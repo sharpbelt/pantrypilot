@@ -1,0 +1,20 @@
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        def pantryPilotMirror = new File("C:/tmp/pantrypilot-maven")
+        if (pantryPilotMirror.exists()) {
+            maven {
+                url pantryPilotMirror.toURI()
+                metadataSources {
+                    mavenPom()
+                    artifact()
+                }
+            }
+        }
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "PantryPilot"
+include ":app"

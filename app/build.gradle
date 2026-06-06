@@ -1,0 +1,55 @@
+apply plugin: "com.android.application"
+
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+def hasReleaseKeystore = keystorePropertiesFile.exists()
+if (hasReleaseKeystore) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+
+android {
+    namespace "app.pantrypilot.app"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "app.pantrypilot.app"
+        minSdk 26
+        targetSdk 35
+        versionCode 102
+        versionName "1.0.2"
+        buildConfigField "String", "ADMOB_BANNER_ID", "\"ca-app-pub-4099703658403844/8712485724\""
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    signingConfigs {
+        release {
+            if (hasReleaseKeystore) {
+                storeFile file(keystoreProperties["storeFile"])
+                storePassword keystoreProperties["storePassword"]
+                keyAlias keystoreProperties["keyAlias"]
+                keyPassword keystoreProperties["keyPassword"]
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField "String", "ADMOB_BANNER_ID", "\"ca-app-pub-3940256099942544/9214589741\""
+        }
+        release {
+            debuggable false
+            minifyEnabled false
+            if (hasReleaseKeystore) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation "com.google.android.gms:play-services-ads:24.9.0"
+    implementation "com.google.android.ump:user-messaging-platform:4.0.0"
+}

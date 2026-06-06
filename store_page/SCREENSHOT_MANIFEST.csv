@@ -1,0 +1,9 @@
+filename,caption,alt_text
+phone_screenshots/01_home.png,"See pantry count, expiry warnings, grocery items, and storage zones from the dashboard.","PantryPilot dashboard showing pantry totals, expiry count, grocery list count, and plan status."
+phone_screenshots/02_scan.png,"Review package photos before adding pantry items.","Scanner screen with import photo, take photo, and sample label controls."
+phone_screenshots/03_scan_parser.png,"Paste label text from camera OCR, receipts, or notes to draft item fields.","Label text parser section for pasted package or receipt text."
+phone_screenshots/04_pantry.png,"Keep food organized by fridge, freezer, pantry, counter, and other zones.","Categorized pantry inventory with food cards and expiry information."
+phone_screenshots/05_grocery.png,"Build grocery lists by category and clear checked items.","Grocery list screen with grouped shopping items and checklist controls."
+phone_screenshots/06_meals.png,"Get local meal ideas from what is already in your kitchen.","Meal ideas generated from pantry items with local offline planning."
+phone_screenshots/07_plans.png,"Free, Plus, and Pro plan gates are visible for testing.","Plans screen explaining demo purchase behavior and local entitlements."
+phone_screenshots/08_plans_products.png,"Draft product IDs are ready for Play Billing integration.","Plus and Pro plan cards showing draft Google Play product IDs."
