@@ -86,7 +86,6 @@ after the test requirement and all declarations are complete.
 
 ## 7. Remaining Technical Verification
 
-- Reconnect the S20 and run:
-  `tools\android_s20_feature_suite.ps1`
-- Confirm the automated release lint gate still passes before uploading.
+- The final S20 feature suite and automated release lint gate pass on the
+  current local build.
 - Do not promote to production until real Play Billing tests pass.

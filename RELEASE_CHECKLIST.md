@@ -9,6 +9,8 @@
 - Verify release enables Billing and debug disables real Billing.
 - Verify Free ads load after UMP and paid/ad-free plans hide them.
 - Verify no location, contacts, storage, or notification permissions.
+- Verify all permissions added by Google SDK manifest merging remain documented
+  in `DATA_SAFETY.md`.
 
 ## Account-Side
 

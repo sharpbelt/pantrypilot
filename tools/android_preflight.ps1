@@ -33,6 +33,7 @@ $manifest = Join-Path $ProjectRoot "app\src\main\AndroidManifest.xml"
 $mainActivity = Join-Path $ProjectRoot "app\src\main\java\app\pantrypilot\app\MainActivity.java"
 $rules = Join-Path $ProjectRoot "app\src\main\java\app\pantrypilot\app\PantryRules.java"
 $rulesTest = Join-Path $ProjectRoot "tools\PantryRulesSelfTest.java"
+$dataSafety = Join-Path $ProjectRoot "DATA_SAFETY.md"
 $testOut = Join-Path $ProjectRoot "tools\out"
 
 Require (Test-Path -LiteralPath $appBuild) "Android Gradle file exists"
@@ -40,6 +41,7 @@ Require (Test-Path -LiteralPath $manifest) "Android manifest exists"
 Require (Test-Path -LiteralPath $mainActivity) "MainActivity source exists"
 Require (Test-Path -LiteralPath $rules) "PantryRules source exists"
 Require (Test-Path -LiteralPath $rulesTest) "PantryRules self-test source exists"
+Require (Test-Path -LiteralPath $dataSafety) "Data Safety draft exists"
 Require (!(Test-Path -LiteralPath (Join-Path $ProjectRoot "ios"))) "iOS target folder is absent"
 
 $gradleText = ReadText $appBuild
@@ -148,7 +150,17 @@ Require ($artifactsAreCurrent -and (Test-Path -LiteralPath $releaseApk)) "Curren
 Require ($artifactsAreCurrent -and (Test-Path -LiteralPath $releaseAab)) "Current release AAB exists"
 $mergedReleaseManifest = Join-Path $ProjectRoot "app\build\intermediates\merged_manifest\release\processReleaseMainManifest\AndroidManifest.xml"
 if (Test-Path -LiteralPath $mergedReleaseManifest) {
-    Require ((ReadText $mergedReleaseManifest) -match 'com.android.vending.BILLING') "Release manifest receives Google Play Billing permission from the SDK"
+    $mergedManifestText = ReadText $mergedReleaseManifest
+    Require ($mergedManifestText -match 'com.android.vending.BILLING') "Release manifest receives Google Play Billing permission from the SDK"
+    Require ($mergedManifestText -match 'com.google.android.gms.permission.AD_ID' -and
+            $mergedManifestText -match 'android.permission.ACCESS_ADSERVICES_ATTRIBUTION' -and
+            $mergedManifestText -match 'android.permission.WAKE_LOCK' -and
+            $mergedManifestText -match 'android.permission.FOREGROUND_SERVICE') "Merged Google SDK support permissions are present"
+    $dataSafetyText = ReadText $dataSafety
+    Require ($dataSafetyText -match 'advertising ID' -and
+            $dataSafetyText -match 'attribution/topics' -and
+            $dataSafetyText -match 'wake-lock' -and
+            $dataSafetyText -match 'foreground-service') "Data Safety draft documents merged Google SDK permissions"
 }
 
 $copiedDebug = "C:\tmp\PantryPilot-debug.apk"

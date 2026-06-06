@@ -76,13 +76,21 @@ Mobile Ads SDK 24.9.0 automatically collects and shares advertising data.
 
 ## Permissions And SDKs
 
-- Internet and network-state access are used for AdMob.
+- PantryPilot directly declares Internet and network-state access for AdMob.
+- The merged release manifest also receives advertising ID, Privacy Sandbox
+  attribution/topics, wake-lock, foreground-service, and internal
+  non-exported-receiver permissions from Google SDK dependencies.
+- Advertising identifier and attribution permissions support the AdMob data
+  handling declared above. Wake-lock and foreground-service permissions are
+  SDK support permissions; PantryPilot does not run its own user-facing
+  foreground service.
 - Google Mobile Ads SDK: `24.9.0`
 - Google User Messaging Platform SDK: `4.0.0`
 - Google Play Billing Library: `9.0.0`
 - Google Play Billing permission is used for optional one-time digital upgrades.
-- No account, precise location, contacts, storage, or notification permission is
-  currently used.
+- No account, precise/coarse device location, contacts, storage, camera, or
+  notification permission is currently used. Camera and image selection are
+  delegated to external Android apps/pickers.
 
 ## Google Play Billing Data Safety Note
 

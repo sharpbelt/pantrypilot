@@ -11,6 +11,9 @@ This is an engineering review, not legal advice or a guarantee of approval.
 - Target SDK: 35
 - Google Mobile Ads SDK with UMP consent handling
 - Google Play Billing 9.0.0 for optional one-time digital upgrades
+- Merged Google SDK permissions for advertising ID/attribution, wake lock,
+  foreground service, and an internal non-exported receiver are documented in
+  `DATA_SAFETY.md`
 - No accounts, analytics SDK, location, contacts, notifications, or broad
   storage access
 - Local pantry, grocery, image-review, parser, and meal-idea data

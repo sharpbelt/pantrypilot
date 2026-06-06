@@ -27,9 +27,13 @@ iOS support is intentionally removed from this candidate.
 - Android release AAB builds.
 - Signed release APK verifies with Android SDK `apksigner`.
 - Signed release AAB verifies with JDK `jarsigner`.
-- Internet and network-state permissions are present for Google AdMob.
-- Google Play Billing permission is present in the merged release manifest.
-- No precise location, notification, storage, or account permission is present.
+- Internet and network-state permissions are directly declared for Google
+  AdMob.
+- The merged release manifest includes Google Play Billing plus Google SDK
+  advertising ID/attribution, wake-lock, foreground-service, and internal
+  receiver permissions.
+- No precise/coarse location, notification, camera, storage, contacts, or
+  account permission is present.
 - Release build is not debuggable.
 - Android backup is disabled.
 - Cleartext traffic is disabled.

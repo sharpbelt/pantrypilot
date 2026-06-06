@@ -49,8 +49,11 @@ from Git.
 - Debug billing: local non-charging demo
 - AdMob release unit: production
 - AdMob debug unit: Google's test unit
-- Permissions: Internet, network state, and Google Play Billing
-- No location, contacts, storage, notification, or account permission
+- Direct permissions: Internet and network state
+- SDK-merged permissions: Google Play Billing, advertising ID/attribution,
+  wake lock, foreground service, and an internal non-exported receiver
+- No precise/coarse location, contacts, storage, camera, notification, or
+  account permission
 - Android backup disabled
 - Cleartext traffic disabled
 
