@@ -2,6 +2,10 @@
 
 Use this checklist for PantryPilot `1.0.3` / version code `103`.
 
+Run `tools\prepare_play_console_submission.ps1` before opening Play Console.
+It creates a verified, credential-free submission folder and ZIP under
+`C:\tmp`.
+
 ## 1. Create One-Time Products
 
 Open **Monetize > Products > In-app products / One-time products** and create:

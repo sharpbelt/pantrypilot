@@ -115,3 +115,7 @@ completed and real Billing tests pass.
 Run `tools\production_readiness_report.ps1` before each upload to generate a
 current local/public-hosting audit at
 `C:\tmp\PantryPilot-production-readiness.md`.
+
+Run `tools\prepare_play_console_submission.ps1` after the audit passes to create
+`C:\tmp\PantryPilot-play-console-submission.zip`. This ZIP intentionally
+contains no APK, keystore, signing properties, password source, or debug output.

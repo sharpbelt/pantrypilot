@@ -6,6 +6,8 @@
 - Run `tools\android_s20_feature_suite.ps1` with the S20 connected.
 - Run `tools\production_readiness_report.ps1` and resolve every automated
   failure.
+- Run `tools\prepare_play_console_submission.ps1` to create the final
+  credential-free upload bundle.
 - Build and sign `C:\tmp\PantryPilot-release.aab`.
 - Verify package `app.pantrypilot.app`, version `1.0.3` / `103`, target SDK 35.
 - Verify release enables Billing and debug disables real Billing.
@@ -37,3 +39,6 @@
 See `store_page\PLAY_CONSOLE_FINAL_SUBMISSION.md` for exact console values.
 The generated `C:\tmp\PantryPilot-production-readiness.md` separates automated
 evidence from the remaining account-side gates.
+The generated `C:\tmp\PantryPilot-play-console-submission.zip` contains the AAB,
+store assets, declarations, checksums, and upload instructions without signing
+credentials or debug artifacts.
