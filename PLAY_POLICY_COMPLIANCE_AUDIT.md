@@ -38,6 +38,8 @@ is a fraud-resistance tradeoff, not a Play Billing policy bypass.
 - US-state and European-regulations messages are active.
 - `https://sharpbelt.github.io/app-ads.txt` contains the publisher record.
 - The privacy policy and Data Safety draft disclose AdMob handling.
+- The in-app Privacy dialog links directly to the hosted full policy and
+  developer support email.
 
 ## Required Play Console Declarations
 

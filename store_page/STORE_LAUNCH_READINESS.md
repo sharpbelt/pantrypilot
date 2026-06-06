@@ -27,7 +27,8 @@ Remaining launch gates require Play Console account actions:
 4. Complete all Play Console declarations and store listing fields.
 5. Run the required closed test if the personal developer account is subject to
    Google's 12-testers-for-14-days production-access rule.
-   Use `CLOSED_TESTING_GUIDE.md` and `CLOSED_TESTER_TRACKER.csv`.
+   Use `store_page\CLOSED_TESTING_GUIDE.md` and
+   `store_page\CLOSED_TESTER_TRACKER.csv`.
 
 ## Upload Artifacts
 
@@ -110,3 +111,7 @@ Go for uploading version `103` to Internal testing.
 
 No-go for public production until the account-side launch gates above are
 completed and real Billing tests pass.
+
+Run `tools\production_readiness_report.ps1` before each upload to generate a
+current local/public-hosting audit at
+`C:\tmp\PantryPilot-production-readiness.md`.

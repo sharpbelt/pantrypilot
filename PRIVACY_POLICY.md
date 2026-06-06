@@ -114,5 +114,5 @@ change. The effective date above identifies the latest revision.
 
 ## Contact
 
-For privacy questions, use the developer support email shown on PantryPilot's
-Google Play store listing.
+For privacy questions, contact the PantryPilot developer at
+`tarkovchains@gmail.com`.

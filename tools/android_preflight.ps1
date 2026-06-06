@@ -34,6 +34,9 @@ $mainActivity = Join-Path $ProjectRoot "app\src\main\java\app\pantrypilot\app\Ma
 $rules = Join-Path $ProjectRoot "app\src\main\java\app\pantrypilot\app\PantryRules.java"
 $rulesTest = Join-Path $ProjectRoot "tools\PantryRulesSelfTest.java"
 $dataSafety = Join-Path $ProjectRoot "DATA_SAFETY.md"
+$privacyPolicy = Join-Path $ProjectRoot "PRIVACY_POLICY.md"
+$strings = Join-Path $ProjectRoot "app\src\main\res\values\strings.xml"
+$appAds = Join-Path $ProjectRoot "app-ads.txt"
 $testOut = Join-Path $ProjectRoot "tools\out"
 
 Require (Test-Path -LiteralPath $appBuild) "Android Gradle file exists"
@@ -42,6 +45,9 @@ Require (Test-Path -LiteralPath $mainActivity) "MainActivity source exists"
 Require (Test-Path -LiteralPath $rules) "PantryRules source exists"
 Require (Test-Path -LiteralPath $rulesTest) "PantryRules self-test source exists"
 Require (Test-Path -LiteralPath $dataSafety) "Data Safety draft exists"
+Require (Test-Path -LiteralPath $privacyPolicy) "Privacy policy exists"
+Require (Test-Path -LiteralPath $strings) "Android strings exist"
+Require (Test-Path -LiteralPath $appAds) "App-ads publisher file exists"
 Require (!(Test-Path -LiteralPath (Join-Path $ProjectRoot "ios"))) "iOS target folder is absent"
 
 $gradleText = ReadText $appBuild
@@ -62,9 +68,13 @@ if ($hasKeystoreProperties) {
 }
 
 $manifestText = ReadText $manifest
+$appAdsText = ReadText $appAds
 Require ($manifestText -match 'android.permission.INTERNET') "Internet permission is declared for AdMob"
 Require ($manifestText -match 'android.permission.ACCESS_NETWORK_STATE') "Network-state permission is declared for AdMob"
 Require ($manifestText -match 'com.google.android.gms.ads.APPLICATION_ID') "AdMob application ID metadata is declared"
+Require ($manifestText -match 'ca-app-pub-4099703658403844~6900710604' -and
+        $gradleText -match 'ca-app-pub-4099703658403844/8712485724' -and
+        $appAdsText -match 'pub-4099703658403844') "AdMob app, banner, and app-ads publisher IDs are aligned"
 Require ($manifestText -match 'android:allowBackup="false"') "Android backup is disabled"
 Require ($manifestText -match 'android:dataExtractionRules="@xml/data_extraction_rules"' -and $manifestText -match 'android:fullBackupContent="@xml/backup_rules"') "Modern and legacy backup rules are declared"
 Require ($manifestText -match 'android:usesCleartextTraffic="false"') "Cleartext traffic is disabled"
@@ -87,6 +97,13 @@ foreach ($term in $forbiddenPermissionTerms) {
 
 $mainText = ReadText $mainActivity
 $rulesText = ReadText $rules
+$stringsText = ReadText $strings
+$privacyPolicyText = ReadText $privacyPolicy
+Require ($mainText -match 'showPrivacyInfo' -and
+        $mainText -match 'Intent\.ACTION_VIEW' -and
+        $stringsText -match 'https://sharpbelt\.github\.io/pantrypilot/PRIVACY_POLICY\.md' -and
+        $stringsText -match 'tarkovchains@gmail\.com') "In-app privacy dialog links to the full policy and support"
+Require ($privacyPolicyText -match 'tarkovchains@gmail\.com') "Hosted privacy policy includes a privacy contact"
 Require ($rulesText -match 'PLAN_FREE\s*=\s*"Free"' -and $rulesText -match 'PLAN_PLUS\s*=\s*"Plus"' -and $rulesText -match 'PLAN_PRO\s*=\s*"Pro"') "Free/Plus/Pro plan constants exist"
 Require ($rulesText -match 'pantrypilot_remove_ads_one_time' -and $rulesText -match 'pantrypilot_plus_one_time' -and $rulesText -match 'pantrypilot_pro_one_time') "Play product IDs are declared"
 Require ($mainText -match 'Demo purchase' -and $mainText -match 'does not charge money') "Demo purchase flow is clearly marked as non-charging"
@@ -148,6 +165,21 @@ $artifactsAreCurrent = $SkipBuild -or $buildSucceeded
 Require ($artifactsAreCurrent -and (Test-Path -LiteralPath $debugApk)) "Current debug APK exists"
 Require ($artifactsAreCurrent -and (Test-Path -LiteralPath $releaseApk)) "Current release APK exists"
 Require ($artifactsAreCurrent -and (Test-Path -LiteralPath $releaseAab)) "Current release AAB exists"
+if ($artifactsAreCurrent -and $hasKeystoreProperties) {
+    $apksigner = "C:\Users\ser\AppData\Local\Android\Sdk\build-tools\36.1.0\apksigner.bat"
+    $jarsigner = "C:\Program Files\Java\jdk-21\bin\jarsigner.exe"
+    Require (Test-Path -LiteralPath $apksigner) "APK signature verifier exists"
+    Require (Test-Path -LiteralPath $jarsigner) "AAB signature verifier exists"
+    if (Test-Path -LiteralPath $apksigner) {
+        $apkSignatureOutput = (& $apksigner verify --verbose --print-certs $releaseApk 2>&1) -join "`n"
+        Require ($LASTEXITCODE -eq 0 -and $apkSignatureOutput -match 'Verified using v2 scheme.+true' -and
+                $apkSignatureOutput -match 'Number of signers:\s+1') "Release APK has one valid v2 signer"
+    }
+    if (Test-Path -LiteralPath $jarsigner) {
+        $aabSignatureOutput = (& $jarsigner -verify $releaseAab 2>&1) -join "`n"
+        Require ($LASTEXITCODE -eq 0 -and $aabSignatureOutput -match 'jar verified') "Release AAB signature verifies"
+    }
+}
 $mergedReleaseManifest = Join-Path $ProjectRoot "app\build\intermediates\merged_manifest\release\processReleaseMainManifest\AndroidManifest.xml"
 if (Test-Path -LiteralPath $mergedReleaseManifest) {
     $mergedManifestText = ReadText $mergedReleaseManifest

@@ -111,3 +111,7 @@ Go for uploading version `103` to Internal testing.
 
 No-go for public production until the account-side launch gates above are
 completed and real Billing tests pass.
+
+Run `tools\production_readiness_report.ps1` before each upload to generate a
+current local/public-hosting audit at
+`C:\tmp\PantryPilot-production-readiness.md`.

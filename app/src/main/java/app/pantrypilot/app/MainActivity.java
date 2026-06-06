@@ -241,7 +241,7 @@ public class MainActivity extends Activity {
         content = column();
         root.addView(content);
 
-        privacy.setOnClickListener(v -> info(getString(R.string.privacy_title), getString(R.string.privacy_body)));
+        privacy.setOnClickListener(v -> showPrivacyInfo());
         about.setOnClickListener(v -> info(getString(R.string.about_title), getString(R.string.about_body)));
 
         renderActiveTab();
@@ -1826,6 +1826,26 @@ public class MainActivity extends Activity {
 
     private void info(String title, String body) {
         new AlertDialog.Builder(this).setTitle(title).setMessage(body).setPositiveButton("OK", null).show();
+    }
+
+    private void showPrivacyInfo() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.privacy_title)
+                .setMessage(R.string.privacy_body)
+                .setPositiveButton("Full policy", (dialog, which) ->
+                        openExternal(Uri.parse(getString(R.string.privacy_policy_url))))
+                .setNeutralButton("Email support", (dialog, which) ->
+                        openExternal(Uri.parse("mailto:" + getString(R.string.support_email))))
+                .setNegativeButton("Close", null)
+                .show();
+    }
+
+    private void openExternal(Uri uri) {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, uri));
+        } catch (ActivityNotFoundException error) {
+            setStatus("No installed app can open this link.");
+        }
     }
 
     private LinearLayout column() {

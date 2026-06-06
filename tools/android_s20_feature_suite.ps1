@@ -166,6 +166,10 @@ TapText @("Next", "NEXT") "tutorial_next_3" | Out-Null
 TapText @("Start", "START") "tutorial_start" | Out-Null
 AssertText "Sponsored" "home_ad" | Out-Null
 AssertText "Remove ads" "home_remove_ads" | Out-Null
+TapText @("Privacy") "privacy" | Out-Null
+AssertText "Full policy" "privacy_full_policy" | Out-Null
+AssertText "Email support" "privacy_email_support" | Out-Null
+TapText @("Close", "CLOSE") "privacy_close" | Out-Null
 
 TapTab "Pantry"
 TapText @("Manual entry for loose pantry items") "expand_add_pantry" "down" 10 | Out-Null

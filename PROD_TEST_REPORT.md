@@ -164,7 +164,8 @@ Covered workflows:
 Local production-candidate build readiness is complete. The final S20
 regression suite passed on the current build after Billing integration,
 including onboarding, pantry entry, compact date normalization, scanner sample
-parsing, grocery operations, meal ideas, and Remove Ads behavior.
+parsing, grocery operations, meal ideas, Remove Ads behavior, and the in-app
+Full policy and Email support privacy actions.
 
 Play upload signing is configured with the local upload keystore:
 
