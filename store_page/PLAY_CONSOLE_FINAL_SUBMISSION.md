@@ -84,6 +84,10 @@ Start the closed test after Billing and the store listing are complete. Keep
 testers opted in and collect genuine feedback. Apply for production access only
 after the test requirement and all declarations are complete.
 
+Use `CLOSED_TESTING_GUIDE.md` for the recruitment message, tester instructions,
+feedback questions, and production-access application guidance. Track the test
+with `CLOSED_TESTER_TRACKER.csv`.
+
 ## 7. Remaining Technical Verification
 
 - The final S20 feature suite and automated release lint gate pass on the

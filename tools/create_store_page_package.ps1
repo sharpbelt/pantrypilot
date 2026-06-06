@@ -18,6 +18,8 @@ $requiredScreenshots = @(
 $requiredFiles = @(
     "PLAY_STORE_PAGE.md",
     "PLAY_CONSOLE_FINAL_SUBMISSION.md",
+    "CLOSED_TESTING_GUIDE.md",
+    "CLOSED_TESTER_TRACKER.csv",
     "UPLOAD_CHECKLIST.md",
     "SCREENSHOT_MANIFEST.csv",
     "SCREENSHOT_VERIFICATION.json",

@@ -27,6 +27,7 @@ Remaining launch gates require Play Console account actions:
 4. Complete all Play Console declarations and store listing fields.
 5. Run the required closed test if the personal developer account is subject to
    Google's 12-testers-for-14-days production-access rule.
+   Use `CLOSED_TESTING_GUIDE.md` and `CLOSED_TESTER_TRACKER.csv`.
 
 ## Upload Artifacts
 

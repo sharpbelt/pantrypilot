@@ -11,6 +11,8 @@ Use these files:
 - Screenshot captions and alt text: `SCREENSHOT_MANIFEST.csv`
 - Monetization setup: `..\GOOGLE_PLAY_MONETIZATION_SETUP.md`
 - Launch readiness: `..\STORE_LAUNCH_READINESS.md`
+- Closed-test recruitment and instructions: `CLOSED_TESTING_GUIDE.md`
+- Closed-test participation tracker: `CLOSED_TESTER_TRACKER.csv`
 
 Verified local asset dimensions:
 
@@ -54,3 +56,5 @@ Remaining manual Play Console fields:
 - Pricing country availability
 - Content rating questionnaire
 - Target audience questionnaire
+- Closed-test opt-in link and at least 15 recruited testers, providing a buffer
+  above the required 12 continuously opted-in testers
