@@ -10,6 +10,7 @@ keystore.properties
 *.apks
 *.idsig
 captures/
+store_page/raw/
 .idea/
 *.iml
 *.log

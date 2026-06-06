@@ -64,6 +64,7 @@ Require ($manifestText -match 'android.permission.INTERNET') "Internet permissio
 Require ($manifestText -match 'android.permission.ACCESS_NETWORK_STATE') "Network-state permission is declared for AdMob"
 Require ($manifestText -match 'com.google.android.gms.ads.APPLICATION_ID') "AdMob application ID metadata is declared"
 Require ($manifestText -match 'android:allowBackup="false"') "Android backup is disabled"
+Require ($manifestText -match 'android:dataExtractionRules="@xml/data_extraction_rules"' -and $manifestText -match 'android:fullBackupContent="@xml/backup_rules"') "Modern and legacy backup rules are declared"
 Require ($manifestText -match 'android:usesCleartextTraffic="false"') "Cleartext traffic is disabled"
 Require ($manifestText -match 'android:exported="true"') "Launcher activity explicitly declares exported=true"
 Require ($manifestText -match 'android:exported="false"') "Image provider explicitly declares exported=false"
@@ -94,6 +95,7 @@ Require ($mainText -match 'requirePlan\("Meal extras", PantryRules\.PLAN_PRO\)')
 Require ($mainText -match 'canAddPantryOrShowUpgrade' -and $mainText -match 'canAddGroceryOrShowUpgrade') "Pantry and grocery limits are enforced"
 Require ($rulesText -match 'normalizeDateInput' -and $mainText -match 'dateField\("Expiry YYYY-MM-DD"\)' -and $mainText -match 'DigitsKeyListener\.getInstance\("0123456789-"\)') "Expiry input accepts hyphen-capable numeric dates"
 Require ($mainText -match 'PREF_TUTORIAL_SEEN' -and $mainText -match 'showTutorialStep' -and $mainText -match 'Welcome to PantryPilot') "First-run tutorial is implemented"
+Require ($mainText -match 'postDelayed\(\(\) -> \{' -and $mainText -match '!prefs\.getBoolean\(PREF_TUTORIAL_SEEN, false\)') "Delayed tutorial callback re-checks completion state"
 Require ($mainText -match 'freeAdBanner' -and $mainText -match 'Remove ads' -and $mainText -match 'PantryRules\.PLAN_FREE') "Free-only ad surface is implemented"
 Require ($mainText -match 'if \(adsRemoved\(\)\) return null;' -and $mainText -match 'if \(!PantryRules\.PLAN_FREE\.equals\(currentPlan\)\) return null;') "Paid and ad-free users cannot receive the Free banner"
 Require ($mainText -match 'confirmDemoRemoveAds' -and $mainText -match 'PREF_AD_FREE' -and $mainText -match 'PantryRules\.REMOVE_ADS_PRODUCT_ID') "Standalone remove-ads entitlement is implemented"
@@ -105,6 +107,7 @@ Require ($gradleText -match 'com\.android\.billingclient:billing:9\.0\.0') "Curr
 Require ($gradleText -match 'PLAY_BILLING_ENABLED",\s*"true"' -and $gradleText -match 'PLAY_BILLING_ENABLED",\s*"false"') "Release billing and debug demo modes are separated"
 Require ($mainText -match 'BillingClient\.newBuilder' -and $mainText -match 'queryProductDetailsAsync' -and $mainText -match 'launchBillingFlow') "Google Play product query and purchase flow are implemented"
 Require ($mainText -match 'queryPurchasesAsync' -and $mainText -match 'acknowledgePurchase' -and $mainText -match 'PurchaseState\.PENDING') "Purchase restore, acknowledgement, and pending handling are implemented"
+Require ((ReadText (Join-Path $ProjectRoot "app\src\main\res\mipmap-anydpi-v26\ic_launcher.xml")) -match 'monochrome') "Launcher adaptive icon includes monochrome support"
 
 $javac = "C:\Program Files\Java\jdk-21\bin\javac.exe"
 $java = "C:\Program Files\Java\jdk-21\bin\java.exe"
@@ -117,14 +120,21 @@ Require ($LASTEXITCODE -eq 0) "PantryRules self-test compiles"
 & $java -cp $testOut app.pantrypilot.app.PantryRulesSelfTest
 Require ($LASTEXITCODE -eq 0) "PantryRules self-test passes"
 
+$buildSucceeded = $true
 if (!$SkipBuild) {
     Require (Test-Path -LiteralPath $Gradle) "Gradle executable exists"
     $gradleNetworkMode = @()
     if (Test-Path -LiteralPath "C:\tmp\pantrypilot-maven") {
         $gradleNetworkMode = @("--offline")
     }
-    & $Gradle @gradleNetworkMode assembleDebug assembleRelease bundleRelease -x lintVitalAnalyzeRelease -x lintVitalReportRelease -x lintVitalRelease
-    Require ($LASTEXITCODE -eq 0) "Android debug/release APK and AAB build succeeds"
+    Push-Location $ProjectRoot
+    try {
+        & $Gradle @gradleNetworkMode assembleDebug assembleRelease bundleRelease lintRelease -x lintVitalAnalyzeRelease -x lintVitalReportRelease -x lintVitalRelease
+        $buildSucceeded = $LASTEXITCODE -eq 0
+    } finally {
+        Pop-Location
+    }
+    Require $buildSucceeded "Android debug/release APK, AAB, and release lint succeed"
 }
 
 $debugApk = Join-Path $ProjectRoot "app\build\outputs\apk\debug\app-debug.apk"
@@ -132,9 +142,10 @@ $signedReleaseApk = Join-Path $ProjectRoot "app\build\outputs\apk\release\app-re
 $unsignedReleaseApk = Join-Path $ProjectRoot "app\build\outputs\apk\release\app-release-unsigned.apk"
 $releaseApk = if ($hasKeystoreProperties) { $signedReleaseApk } else { $unsignedReleaseApk }
 $releaseAab = Join-Path $ProjectRoot "app\build\outputs\bundle\release\app-release.aab"
-Require (Test-Path -LiteralPath $debugApk) "Debug APK exists"
-Require (Test-Path -LiteralPath $releaseApk) "Release APK exists"
-Require (Test-Path -LiteralPath $releaseAab) "Release AAB exists"
+$artifactsAreCurrent = $SkipBuild -or $buildSucceeded
+Require ($artifactsAreCurrent -and (Test-Path -LiteralPath $debugApk)) "Current debug APK exists"
+Require ($artifactsAreCurrent -and (Test-Path -LiteralPath $releaseApk)) "Current release APK exists"
+Require ($artifactsAreCurrent -and (Test-Path -LiteralPath $releaseAab)) "Current release AAB exists"
 $mergedReleaseManifest = Join-Path $ProjectRoot "app\build\intermediates\merged_manifest\release\processReleaseMainManifest\AndroidManifest.xml"
 if (Test-Path -LiteralPath $mergedReleaseManifest) {
     Require ((ReadText $mergedReleaseManifest) -match 'com.android.vending.BILLING') "Release manifest receives Google Play Billing permission from the SDK"
@@ -143,12 +154,12 @@ if (Test-Path -LiteralPath $mergedReleaseManifest) {
 $copiedDebug = "C:\tmp\PantryPilot-debug.apk"
 $copiedReleaseApk = if ($hasKeystoreProperties) { "C:\tmp\PantryPilot-release.apk" } else { "C:\tmp\PantryPilot-release-unsigned.apk" }
 $copiedReleaseAab = "C:\tmp\PantryPilot-release.aab"
-if (Test-Path -LiteralPath $debugApk) { Copy-Item -LiteralPath $debugApk -Destination $copiedDebug -Force }
-if (Test-Path -LiteralPath $releaseApk) { Copy-Item -LiteralPath $releaseApk -Destination $copiedReleaseApk -Force }
-if (Test-Path -LiteralPath $releaseAab) { Copy-Item -LiteralPath $releaseAab -Destination $copiedReleaseAab -Force }
-Require (Test-Path -LiteralPath $copiedDebug) "Copied debug APK exists"
-Require (Test-Path -LiteralPath $copiedReleaseApk) "Copied release APK exists"
-Require (Test-Path -LiteralPath $copiedReleaseAab) "Copied release AAB exists"
+if ($artifactsAreCurrent -and (Test-Path -LiteralPath $debugApk)) { Copy-Item -LiteralPath $debugApk -Destination $copiedDebug -Force }
+if ($artifactsAreCurrent -and (Test-Path -LiteralPath $releaseApk)) { Copy-Item -LiteralPath $releaseApk -Destination $copiedReleaseApk -Force }
+if ($artifactsAreCurrent -and (Test-Path -LiteralPath $releaseAab)) { Copy-Item -LiteralPath $releaseAab -Destination $copiedReleaseAab -Force }
+Require ($artifactsAreCurrent -and (Test-Path -LiteralPath $copiedDebug)) "Copied current debug APK exists"
+Require ($artifactsAreCurrent -and (Test-Path -LiteralPath $copiedReleaseApk)) "Copied current release APK exists"
+Require ($artifactsAreCurrent -and (Test-Path -LiteralPath $copiedReleaseAab)) "Copied current release AAB exists"
 
 if ($failures.Count -gt 0) {
     Write-Output ""

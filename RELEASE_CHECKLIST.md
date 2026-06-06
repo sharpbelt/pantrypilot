@@ -27,7 +27,7 @@
 - Public privacy policy and root `app-ads.txt` return HTTP 200.
 - Real Billing tests pass for success, decline, pending, restore, refund, and
   revoke.
-- Connected release lint passes outside the restricted offline mirror.
+- Automated release lint passes.
 - Store copy and screenshots match the release build.
 
 See `store_page\PLAY_CONSOLE_FINAL_SUBMISSION.md` for exact console values.

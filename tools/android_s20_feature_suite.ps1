@@ -190,7 +190,7 @@ $xml = AssertText "AutoSoup" "manual_add_item" "down" 6
 Require ($xml -match "2026-12-31") "Compact date is saved as 2026-12-31"
 
 TapTab "Scan"
-TapText @("Test sample label") "sample_label" "down" 5 | Out-Null
+TapText @("Try sample label") "sample_label" "down" 5 | Out-Null
 $xml = AssertText "Greek Yogurt" "scanner_sample_name" "down" 6
 Require ($xml -match "500g") "Scanner sample quantity appears"
 Require ($xml -match "2026-12-31") "Scanner sample expiry appears"

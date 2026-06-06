@@ -59,8 +59,8 @@ calorie tracker, cloud-sync service, or automatic package-image OCR service.
 - Feature graphic: `graphics/feature_graphic_1024x500.png`
 - Upload screenshots `phone_screenshots/01_home.png` through
   `phone_screenshots/06_meals.png`
-- Do not upload screenshots 07 or 08 until they are recaptured from a Play
-  internal-test release with active products.
+- A Plans screenshot is intentionally omitted until it can be captured from a
+  Play internal-test release with active products and real localized prices.
 
 ## Screenshot Captions
 

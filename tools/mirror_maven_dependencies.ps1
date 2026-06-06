@@ -8,6 +8,7 @@ $repositories = @(
     "https://dl.google.com/dl/android/maven2",
     "https://repo.maven.apache.org/maven2"
 )
+Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 function ChildText($node, $name) {
     $child = $node.SelectSingleNode("*[local-name()='$name']")
@@ -30,15 +31,38 @@ function NormalizeVersion($version, $properties) {
 }
 
 function DownloadFile($relativePath, $outputPath) {
-    if (Test-Path -LiteralPath $outputPath) { return $true }
-    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $outputPath) | Out-Null
-    foreach ($repository in $repositories) {
+    function TestDownloadedFile($path) {
+        if (!(Test-Path -LiteralPath $path)) { return $false }
+        if ($path -notmatch '\.(jar|aar)(\.part)?$') { return $true }
         try {
-            Invoke-WebRequest -Uri "$repository/$relativePath" -OutFile $outputPath
+            $archive = [System.IO.Compression.ZipFile]::OpenRead($path)
+            $archive.Dispose()
             return $true
         } catch {
-            if (Test-Path -LiteralPath $outputPath) {
-                Remove-Item -LiteralPath $outputPath -Force
+            return $false
+        }
+    }
+
+    if (TestDownloadedFile $outputPath) { return $true }
+    if (Test-Path -LiteralPath $outputPath) {
+        Remove-Item -LiteralPath $outputPath -Force
+    }
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $outputPath) | Out-Null
+    $temporaryPath = "$outputPath.part"
+    foreach ($repository in $repositories) {
+        try {
+            if (Test-Path -LiteralPath $temporaryPath) {
+                Remove-Item -LiteralPath $temporaryPath -Force
+            }
+            Invoke-WebRequest -Uri "$repository/$relativePath" -OutFile $temporaryPath
+            if (!(TestDownloadedFile $temporaryPath)) {
+                throw "Downloaded artifact is incomplete or corrupt: $relativePath"
+            }
+            Move-Item -LiteralPath $temporaryPath -Destination $outputPath -Force
+            return TestDownloadedFile $outputPath
+        } catch {
+            if (Test-Path -LiteralPath $temporaryPath) {
+                Remove-Item -LiteralPath $temporaryPath -Force
             }
         }
     }

@@ -88,6 +88,5 @@ after the test requirement and all declarations are complete.
 
 - Reconnect the S20 and run:
   `tools\android_s20_feature_suite.ps1`
-- Run a connected Android Studio/Gradle release lint check. The restricted local
-  offline mirror cannot execute Android lint's Kotlin compiler tooling.
+- Confirm the automated release lint gate still passes before uploading.
 - Do not promote to production until real Play Billing tests pass.

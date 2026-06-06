@@ -154,7 +154,11 @@ public class MainActivity extends Activity {
         requestAdConsent();
         initializePlayBilling();
         if (!prefs.getBoolean(PREF_TUTORIAL_SEEN, false)) {
-            currentScroll.postDelayed(() -> showTutorialStep(0), 350);
+            currentScroll.postDelayed(() -> {
+                if (!isFinishing() && !isDestroyed() && !prefs.getBoolean(PREF_TUTORIAL_SEEN, false)) {
+                    showTutorialStep(0);
+                }
+            }, 350);
         }
     }
 
@@ -331,7 +335,7 @@ public class MainActivity extends Activity {
         cameraLp.setMargins(dp(8), 0, 0, 0);
         buttons.addView(takePhoto, cameraLp);
         capture.addView(buttons);
-        Button samplePhoto = secondary("Test sample label");
+        Button samplePhoto = secondary("Try sample label");
         capture.addView(samplePhoto, matchWrap());
         TextView captureGuide = small("Step 1: front label. Step 2: expiry date. Step 3: quantity or multipack count.");
         captureGuide.setPadding(0, dp(8), 0, 0);
@@ -1352,7 +1356,7 @@ public class MainActivity extends Activity {
         paint.setColor(Color.WHITE);
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         paint.setTextSize(68);
-        canvas.drawText("PantryPilot Test Pack", 70, 100, paint);
+        canvas.drawText("PantryPilot Sample Pack", 70, 100, paint);
 
         paint.setColor(0xff18212f);
         paint.setTextSize(82);
@@ -1628,9 +1632,15 @@ public class MainActivity extends Activity {
         }
         int openShop = 0;
         for (ShopItem item : shopping) if (!item.done) openShop++;
-        summary.setText("Plan: " + currentPlan + "   Pantry: " + pantry.size() + "/" + PantryRules.pantryLimit(currentPlan) +
-                "   Expiring soon: " + expiring + "   Grocery: " + openShop + "/" + PantryRules.groceryLimit(currentPlan) +
-                "   Zones: " + usedLocationCount());
+        summary.setText(getString(
+                R.string.dashboard_summary,
+                currentPlan,
+                pantry.size(),
+                PantryRules.pantryLimit(currentPlan),
+                expiring,
+                openShop,
+                PantryRules.groceryLimit(currentPlan),
+                usedLocationCount()));
     }
 
     private List<String> mealIdeas() {

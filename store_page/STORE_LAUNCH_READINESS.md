@@ -71,9 +71,9 @@ Upload:
 - `store_page\graphics\feature_graphic_1024x500.png`
 - Screenshots `01_home.png` through `06_meals.png`
 
-Do not upload the current `07_plans.png` or `08_plans_products.png`; those images
-were captured from the debug-only demo purchase screen. Capture replacement plan
-screens from a Play internal-test install after the products are active.
+The upload package intentionally omits a Plans screenshot. Capture one from a
+Play internal-test install only after the real products are active and prices
+are visible.
 
 ## Monetization Status
 
@@ -93,15 +93,12 @@ purchase verification. A backend is recommended if fraud becomes material.
 - Billing 9.0.0 debug and release code compiles.
 - Release bundle includes the Billing permission.
 - Release and debug builds are separated by `PLAY_BILLING_ENABLED`.
+- Release lint passes.
 - AdMob/UMP test banner was verified on the S20.
-- Existing feature suite passed before Billing integration.
-- Final S20 regression run is pending because the phone disconnected.
+- Final S20 regression suite passes on the current build.
 - Real Billing runtime verification is impossible until Play Console products
   are active and the build is installed through Play or tested by a license
   tester.
-- Release lint remains enabled, but could not execute in the restricted offline
-  dependency mirror. Run a connected Android Studio/Gradle lint before
-  production promotion.
 
 ## Production Go / No-Go
 

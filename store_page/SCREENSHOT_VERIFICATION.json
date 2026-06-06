@@ -1,0 +1,38 @@
+{
+    "captured_at_utc":  "2026-06-06T16:04:11.1090292Z",
+    "app_package":  "app.pantrypilot.app",
+    "apk_sha256":  "6CF3510E5BDDB0B9E877D5973802221FAF34DE84DC1BB02202AA13226494116B",
+    "capture_state":  "Debug Remove Ads entitlement enabled through the visible purchase-test UI",
+    "assertions":  [
+                       "Sponsored label absent before capture",
+                       "Test ad status absent before capture",
+                       "Inactive AdMob placeholder absent before capture",
+                       "Debug Plans screens excluded"
+                   ],
+    "screenshots":  [
+                        {
+                            "file":  "phone_screenshots/01_home.png",
+                            "sha256":  "C11340C89F465C91265E3C3AE18E7E197BCCC75EC2E8CA2474A882820D90B6D3"
+                        },
+                        {
+                            "file":  "phone_screenshots/02_scan.png",
+                            "sha256":  "A9E78CC1F8C3DBB2304DE9E42F8C8B23AF5C2F867A056A97C0B7250F8AE90A09"
+                        },
+                        {
+                            "file":  "phone_screenshots/03_scan_parser.png",
+                            "sha256":  "AB6FE3FC83523CA217C0599C2B1298EDC71B33DC459D0179CE3FEC6F8C8891FF"
+                        },
+                        {
+                            "file":  "phone_screenshots/04_pantry.png",
+                            "sha256":  "5721EB7A310F05457534426F3784D56C2026292B2CFAC640F3A392B6CBC83185"
+                        },
+                        {
+                            "file":  "phone_screenshots/05_grocery.png",
+                            "sha256":  "BFAA771A238EB4B2CA9959CA67DE4D4007210EE829F5AA09F69F6FD3128B2743"
+                        },
+                        {
+                            "file":  "phone_screenshots/06_meals.png",
+                            "sha256":  "EE0A40CA0495487814D24359184BAAE4674E7C88B250814E2911852E11913085"
+                        }
+                    ]
+}

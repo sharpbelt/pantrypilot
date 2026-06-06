@@ -27,8 +27,8 @@ function DumpUi($name) {
     return Get-Content -LiteralPath $localXml -Raw
 }
 
-function TapText([string[]]$labels) {
-    for ($attempt = 0; $attempt -lt 3; $attempt++) {
+function TapText([string[]]$labels, [string]$direction = "none", [int]$attempts = 5) {
+    for ($attempt = 0; $attempt -lt $attempts; $attempt++) {
         $xml = DumpUi "pantrypilot_store_nav"
         foreach ($label in $labels) {
             $pattern = 'text="' + [regex]::Escape($label) + '".*?bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"'
@@ -42,10 +42,30 @@ function TapText([string[]]$labels) {
                 return
             }
         }
-        & $adb -s $Serial shell input swipe 540 500 540 1500 500 | Out-Null
+        if ($direction -eq "down") {
+            & $adb -s $Serial shell input swipe 540 1500 540 500 500 | Out-Null
+        } elseif ($direction -eq "up") {
+            & $adb -s $Serial shell input swipe 540 500 540 1500 500 | Out-Null
+        }
         Start-Sleep -Milliseconds 500
     }
     throw "Could not find any of: $($labels -join ', ')"
+}
+
+function AssertUiAbsent([string[]]$labels, [string]$name) {
+    $xml = DumpUi $name
+    foreach ($label in $labels) {
+        Require ($xml -notmatch [regex]::Escape($label)) "UI omits $label"
+    }
+}
+
+function OpenTab([string]$label) {
+    & $adb -s $Serial shell am force-stop $Package | Out-Null
+    Require ($LASTEXITCODE -eq 0) "Stopped app before opening $label"
+    & $adb -s $Serial shell am start -n "$Package/$Activity" | Out-Null
+    Require ($LASTEXITCODE -eq 0) "Restarted app before opening $label"
+    Start-Sleep -Milliseconds 800
+    TapText @($label)
 }
 
 function Capture($name) {
@@ -56,7 +76,7 @@ function Capture($name) {
     Require ($LASTEXITCODE -eq 0) "Captured $name"
     & $adb -s $Serial pull $remotePng $rawPng | Out-Null
     Require ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $rawPng)) "Pulled $name raw"
-    & $Ffmpeg -y -i $rawPng -vf "crop=iw:iw*2:0:0,scale=1080:2160" -frames:v 1 $finalPng | Out-Null
+    & $Ffmpeg -y -i $rawPng -vf "crop=iw:iw*2:0:0,scale=1080:2160" -frames:v 1 -update 1 $finalPng | Out-Null
     Require ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $finalPng)) "Wrote Play screenshot $name"
 }
 
@@ -79,21 +99,51 @@ TapText @("Next", "NEXT")
 TapText @("Next", "NEXT")
 TapText @("Start", "START")
 
+# Capture the legitimate ad-free product experience so listing screenshots do
+# not contain a debug test ad or an inactive placeholder. Plans screenshots are
+# deliberately excluded because debug builds expose non-charging test controls.
+OpenTab "Plans"
+TapText @("Demo purchase Remove Ads") "down" 8
+TapText @("Unlock demo", "UNLOCK DEMO")
+OpenTab "Home"
+AssertUiAbsent @("Sponsored", "Test ad loaded.", "Ads are inactive until AdMob IDs replace the default placeholders.") "pantrypilot_store_ad_free"
+
 Capture "01_home"
-TapText @("Scan")
+OpenTab "Scan"
 Capture "02_scan"
-TapText @("Test sample label")
+TapText @("Try sample label")
 Capture "03_scan_parser"
-TapText @("Pantry")
+OpenTab "Pantry"
 Capture "04_pantry"
-TapText @("Grocery")
+OpenTab "Grocery"
 Capture "05_grocery"
-TapText @("Meals")
+OpenTab "Meals"
 Capture "06_meals"
-TapText @("Plans")
-Capture "07_plans"
-& $adb -s $Serial shell input swipe 540 1900 540 700 600 | Out-Null
-Start-Sleep -Milliseconds 700
-Capture "08_plans_products"
+
+$verification = [ordered]@{
+    captured_at_utc = (Get-Date).ToUniversalTime().ToString("o")
+    app_package = $Package
+    apk_sha256 = (Get-FileHash -LiteralPath $Apk -Algorithm SHA256).Hash
+    capture_state = "Debug Remove Ads entitlement enabled through the visible purchase-test UI"
+    assertions = @(
+        "Sponsored label absent before capture"
+        "Test ad status absent before capture"
+        "Inactive AdMob placeholder absent before capture"
+        "Debug Plans screens excluded"
+    )
+    screenshots = @()
+}
+
+foreach ($name in @("01_home", "02_scan", "03_scan_parser", "04_pantry", "05_grocery", "06_meals")) {
+    $path = Join-Path $shotDir "$name.png"
+    $verification.screenshots += [ordered]@{
+        file = "phone_screenshots/$name.png"
+        sha256 = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
+    }
+}
+
+$verificationPath = Join-Path $ProjectRoot "store_page\SCREENSHOT_VERIFICATION.json"
+$verification | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $verificationPath -Encoding ascii
+Require (Test-Path -LiteralPath $verificationPath) "Wrote screenshot verification manifest"
 
 Write-Output "Store screenshots captured."

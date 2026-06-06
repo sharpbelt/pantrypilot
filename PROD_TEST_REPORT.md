@@ -157,8 +157,10 @@ Covered workflows:
 
 ## Play Upload Status
 
-Local production-candidate build readiness is complete. Final S20 regression
-testing is pending because the device disconnected after Billing integration.
+Local production-candidate build readiness is complete. The final S20
+regression suite passed on the current build after Billing integration,
+including onboarding, pantry entry, compact date normalization, scanner sample
+parsing, grocery operations, meal ideas, and Remove Ads behavior.
 
 Play upload signing is configured with the local upload keystore:
 
@@ -167,13 +169,26 @@ Play upload signing is configured with the local upload keystore:
 - Signed app bundle: `C:\tmp\PantryPilot-release.aab`
 - Signed release APK: `C:\tmp\PantryPilot-release.apk`
 
-Before uploading to Play Console, back up the `.jks` and password source. Losing the upload key can block future app updates. To recreate the files from a password file:
+Before uploading to Play Console, back up the `.jks` and password source.
+Losing the upload key can block future app updates. To create a replacement
+upload key interactively for a different app:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File C:\tmp\PantryPilot\tools\create_upload_keystore.ps1 -PasswordFile D:\Downloads\1.txt
+powershell -ExecutionPolicy Bypass -File tools\create_upload_keystore.ps1
 ```
 
 The generated signed `.aab` is the Play Console upload artifact.
+
+Release lint also passes. The lint-driven fixes include API-26-compatible
+navigation styling, explicit backup/data-transfer exclusions, monochrome
+launcher icon support, and a localized dashboard summary.
+
+The verified store upload package is:
+
+- `C:\tmp\PantryPilot-store-page-package.zip`
+- Six visually audited customer-facing screenshots
+- No debug Plans screenshots or raw captures
+- Screenshot hashes recorded in `store_page\SCREENSHOT_VERIFICATION.json`
 
 ## Signature Evidence
 

@@ -5,7 +5,8 @@ Use these files:
 - App bundle: `C:\tmp\PantryPilot-release.aab`
 - App icon: `graphics/app_icon_512.png`
 - Feature graphic: `graphics/feature_graphic_1024x500.png`
-- Phone screenshots: `phone_screenshots/*.png`
+- Phone screenshots: `phone_screenshots/01_home.png` through
+  `phone_screenshots/06_meals.png`
 - Store copy: `PLAY_STORE_PAGE.md`
 - Screenshot captions and alt text: `SCREENSHOT_MANIFEST.csv`
 - Monetization setup: `..\GOOGLE_PLAY_MONETIZATION_SETUP.md`
@@ -31,8 +32,13 @@ Safe release wording:
 - Do not claim automatic package-image OCR yet.
 - Google Play Billing and AdMob are integrated; do not promote until real
   Play-distributed purchase tests pass.
-- Upload screenshots 01 through 06 only. Screenshots 07 and 08 show debug-only
-  purchase controls and must be replaced before use.
+- Upload screenshots 01 through 06 only. A Plans screenshot is intentionally
+  omitted until it can be captured from Play internal testing with active
+  products and real localized prices.
+- Run `tools\capture_store_screenshots.ps1` before packaging. It captures the
+  legitimate Remove Ads experience and writes `SCREENSHOT_VERIFICATION.json`.
+- Run `tools\create_store_page_package.ps1` to create the upload package. It
+  refuses stale or modified screenshots and excludes debug Plans screens.
 
 Remaining manual Play Console fields:
 
