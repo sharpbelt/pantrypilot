@@ -40,6 +40,16 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.ump.ConsentInformation;
 import com.google.android.ump.ConsentRequestParameters;
 import com.google.android.ump.UserMessagingPlatform;
+import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.PendingPurchasesParams;
+import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryPurchasesParams;
+import com.android.billingclient.api.Purchase;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -56,6 +66,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 
 public class MainActivity extends Activity {
     private static final int REQ_SCAN_IMAGE = 701;
@@ -73,10 +84,6 @@ public class MainActivity extends Activity {
     private static final String PREF_AD_FREE = "ad_free";
     private static final String PREF_DEMO_PURCHASED_AD_FREE = "demo_purchased_ad_free";
     private static final String PREF_TUTORIAL_SEEN = "tutorial_seen";
-    private static final String BILLING_MODE_DEMO = "demo";
-    private static final String BILLING_MODE_PRODUCTION = "production";
-    private static final String BILLING_MODE = BILLING_MODE_DEMO;
-
     private SharedPreferences prefs;
     private LinearLayout content;
     private ScrollView currentScroll;
@@ -101,6 +108,10 @@ public class MainActivity extends Activity {
     private TextView currentAdStatus;
     private Button currentPrivacyOptions;
     private AdView currentAdView;
+    private BillingClient billingClient;
+    private boolean billingReady = false;
+    private String billingStatus = "Connecting to Google Play...";
+    private final Map<String, ProductDetails> billingProducts = new HashMap<>();
     private final List<PantryItem> pantry = new ArrayList<>();
     private final List<ShopItem> shopping = new ArrayList<>();
     private final Set<String> expandedHome = new HashSet<>();
@@ -141,6 +152,7 @@ public class MainActivity extends Activity {
         expandedHome.add("next");
         buildUi();
         requestAdConsent();
+        initializePlayBilling();
         if (!prefs.getBoolean(PREF_TUTORIAL_SEEN, false)) {
             currentScroll.postDelayed(() -> showTutorialStep(0), 350);
         }
@@ -762,7 +774,7 @@ public class MainActivity extends Activity {
     }
 
     private boolean isProductionBillingConfigured() {
-        return BILLING_MODE_PRODUCTION.equals(BILLING_MODE)
+        return BuildConfig.PLAY_BILLING_ENABLED
                 && !PantryRules.REMOVE_ADS_PRODUCT_ID.trim().isEmpty()
                 && !PantryRules.PLUS_PRODUCT_ID.trim().isEmpty()
                 && !PantryRules.PRO_PRODUCT_ID.trim().isEmpty();
@@ -777,13 +789,12 @@ public class MainActivity extends Activity {
     }
 
     private void renderPlans() {
-        content.addView(sectionTitle("Plans And Demo Purchase"));
+        content.addView(sectionTitle(isProductionBillingConfigured() ? "Plans And Upgrades" : "Plans And Demo Purchase"));
         LinearLayout intro = column();
         intro.addView(title(currentPlan + " plan active"));
         intro.addView(small(isProductionBillingConfigured()
-                ? "Production billing mode is selected. Wire this screen to Google Play Billing before accepting payments."
+                ? billingStatus
                 : "Demo purchase changes a local entitlement for testing Play Console copy and gated UI. It does not charge money and does not contact Google Play yet."));
-        intro.addView(small("Default IDs keep monetization inactive. Replace IDs and add the SDK boot code when Play Console and AdMob are ready."));
         content.addView(panel(intro));
 
         content.addView(removeAdsCard());
@@ -802,10 +813,15 @@ public class MainActivity extends Activity {
                 PantryRules.PRO_PRODUCT_ID));
 
         LinearLayout restore = column();
-        restore.addView(title("Demo Restore"));
-        restore.addView(small("Restores the highest local demo purchase saved on this device. Real restore will be handled by Google Play Billing later."));
-        Button restoreButton = secondary("Restore demo purchase");
-        restoreButton.setOnClickListener(v -> restoreDemoPurchase());
+        restore.addView(title(isProductionBillingConfigured() ? "Restore Purchases" : "Demo Restore"));
+        restore.addView(small(isProductionBillingConfigured()
+                ? "Checks Google Play for owned one-time upgrades and restores them on this device."
+                : "Restores the highest local demo purchase saved on this device."));
+        Button restoreButton = secondary(isProductionBillingConfigured() ? "Restore purchases" : "Restore demo purchase");
+        restoreButton.setOnClickListener(v -> {
+            if (isProductionBillingConfigured()) queryOwnedPurchases(true);
+            else restoreDemoPurchase();
+        });
         restore.addView(restoreButton);
         content.addView(panel(restore));
     }
@@ -815,18 +831,22 @@ public class MainActivity extends Activity {
         TextView heading = title("Remove Ads");
         heading.setTextSize(20);
         card.addView(heading);
-        card.addView(small("$0.99 one-time unlock for users who like Free limits but want the sponsor space gone."));
-        card.addView(small("Play product ID: " + PantryRules.REMOVE_ADS_PRODUCT_ID));
+        card.addView(small("One-time unlock for users who like Free limits but want the sponsor space gone."));
+        if (!isProductionBillingConfigured()) card.addView(small("Play product ID: " + PantryRules.REMOVE_ADS_PRODUCT_ID));
         Button action;
         if (adsRemoved()) {
             action = secondary("Ads removed");
             action.setEnabled(false);
+        } else if (isProductionBillingConfigured()) {
+            action = button(productButtonLabel(PantryRules.REMOVE_ADS_PRODUCT_ID, "Remove Ads"));
+            action.setEnabled(billingReady && billingProducts.containsKey(PantryRules.REMOVE_ADS_PRODUCT_ID));
+            action.setOnClickListener(v -> launchPurchase(PantryRules.REMOVE_ADS_PRODUCT_ID));
         } else {
             action = button("Demo purchase Remove Ads");
             action.setOnClickListener(v -> confirmDemoRemoveAds());
         }
         card.addView(action);
-        if (prefs.getBoolean(PREF_AD_FREE, false)) {
+        if (!isProductionBillingConfigured() && prefs.getBoolean(PREF_AD_FREE, false)) {
             Button reset = secondary("Reset ad-free demo");
             reset.setOnClickListener(v -> {
                 setAdsRemoved(false, false);
@@ -845,7 +865,7 @@ public class MainActivity extends Activity {
         card.addView(heading);
         card.addView(small(pitch));
         card.addView(small(features));
-        if (!productId.isEmpty()) {
+        if (!productId.isEmpty() && !isProductionBillingConfigured()) {
             card.addView(small("Play product ID: " + productId));
         }
         Button action;
@@ -853,12 +873,21 @@ public class MainActivity extends Activity {
             action = secondary("Current plan");
             action.setEnabled(false);
         } else if (PantryRules.PLAN_FREE.equals(plan)) {
-            action = secondary("Reset demo to Free");
-            action.setOnClickListener(v -> {
-                setPlan(PantryRules.PLAN_FREE, false);
-                setStatus("Demo entitlement reset to Free.");
-                buildUi();
-            });
+            if (isProductionBillingConfigured()) {
+                action = secondary("Included");
+                action.setEnabled(false);
+            } else {
+                action = secondary("Reset demo to Free");
+                action.setOnClickListener(v -> {
+                    setPlan(PantryRules.PLAN_FREE, false);
+                    setStatus("Demo entitlement reset to Free.");
+                    buildUi();
+                });
+            }
+        } else if (isProductionBillingConfigured()) {
+            action = button(productButtonLabel(productId, "Buy " + plan));
+            action.setEnabled(billingReady && billingProducts.containsKey(productId));
+            action.setOnClickListener(v -> launchPurchase(productId));
         } else {
             action = button("Demo purchase " + plan);
             action.setOnClickListener(v -> confirmDemoPurchase(plan));
@@ -900,6 +929,163 @@ public class MainActivity extends Activity {
         setAdsRemoved(prefs.getBoolean(PREF_DEMO_PURCHASED_AD_FREE, false), false);
         setStatus("Restored demo entitlement: " + purchased + (adsRemoved() ? " with ads removed." : "."));
         buildUi();
+    }
+
+    private void initializePlayBilling() {
+        if (!isProductionBillingConfigured() || billingClient != null) return;
+        billingClient = BillingClient.newBuilder(this)
+                .setListener(this::onPurchasesUpdated)
+                .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
+                .enableAutoServiceReconnection()
+                .build();
+        billingClient.startConnection(new BillingClientStateListener() {
+            @Override
+            public void onBillingSetupFinished(BillingResult result) {
+                if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    billingReady = true;
+                    billingStatus = "Google Play purchases are ready.";
+                    queryBillingProducts();
+                    queryOwnedPurchases(false);
+                } else {
+                    billingStatus = "Google Play purchases unavailable: " + result.getDebugMessage();
+                    refreshPlansIfVisible();
+                }
+            }
+
+            @Override
+            public void onBillingServiceDisconnected() {
+                billingReady = false;
+                billingStatus = "Reconnecting to Google Play...";
+                refreshPlansIfVisible();
+            }
+        });
+    }
+
+    private void queryBillingProducts() {
+        if (!billingReady || billingClient == null) return;
+        List<QueryProductDetailsParams.Product> products = new ArrayList<>();
+        for (String id : Arrays.asList(PantryRules.REMOVE_ADS_PRODUCT_ID,
+                PantryRules.PLUS_PRODUCT_ID, PantryRules.PRO_PRODUCT_ID)) {
+            products.add(QueryProductDetailsParams.Product.newBuilder()
+                    .setProductId(id)
+                    .setProductType(BillingClient.ProductType.INAPP)
+                    .build());
+        }
+        QueryProductDetailsParams params = QueryProductDetailsParams.newBuilder()
+                .setProductList(products)
+                .build();
+        billingClient.queryProductDetailsAsync(params, (result, detailsResult) -> {
+            billingProducts.clear();
+            for (ProductDetails details : detailsResult.getProductDetailsList()) {
+                billingProducts.put(details.getProductId(), details);
+            }
+            billingStatus = billingProducts.isEmpty()
+                    ? "Upgrades are not available yet. Check again after Play products are active."
+                    : "Google Play purchases are ready.";
+            refreshPlansIfVisible();
+        });
+    }
+
+    private String productButtonLabel(String productId, String fallback) {
+        ProductDetails details = billingProducts.get(productId);
+        if (details == null) return billingReady ? fallback + " unavailable" : "Connecting...";
+        List<ProductDetails.OneTimePurchaseOfferDetails> offers = details.getOneTimePurchaseOfferDetailsList();
+        if (offers != null && !offers.isEmpty()) {
+            return fallback + " - " + offers.get(0).getFormattedPrice();
+        }
+        return fallback;
+    }
+
+    private void launchPurchase(String productId) {
+        ProductDetails details = billingProducts.get(productId);
+        if (!billingReady || billingClient == null || details == null) {
+            setStatus("Google Play purchase details are not available yet.");
+            return;
+        }
+        BillingFlowParams.ProductDetailsParams productParams =
+                BillingFlowParams.ProductDetailsParams.newBuilder()
+                        .setProductDetails(details)
+                        .build();
+        BillingResult result = billingClient.launchBillingFlow(this,
+                BillingFlowParams.newBuilder()
+                        .setProductDetailsParamsList(Arrays.asList(productParams))
+                        .build());
+        if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+            setStatus("Could not open Google Play purchase: " + result.getDebugMessage());
+        }
+    }
+
+    private void onPurchasesUpdated(BillingResult result, List<Purchase> purchases) {
+        if (result.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
+            processOwnedPurchases(purchases, true);
+        } else if (result.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED) {
+            setStatus("Purchase cancelled.");
+        } else {
+            setStatus("Google Play purchase unavailable: " + result.getDebugMessage());
+        }
+    }
+
+    private void queryOwnedPurchases(boolean userRequested) {
+        if (!billingReady || billingClient == null) {
+            if (userRequested) setStatus("Google Play is not connected yet.");
+            return;
+        }
+        QueryPurchasesParams params = QueryPurchasesParams.newBuilder()
+                .setProductType(BillingClient.ProductType.INAPP)
+                .build();
+        billingClient.queryPurchasesAsync(params, (result, purchases) -> {
+            if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                processOwnedPurchases(purchases, userRequested);
+            } else if (userRequested) {
+                setStatus("Could not restore purchases: " + result.getDebugMessage());
+            }
+        });
+    }
+
+    private void processOwnedPurchases(List<Purchase> purchases, boolean notifyUser) {
+        String ownedPlan = PantryRules.PLAN_FREE;
+        boolean ownedAdFree = false;
+        boolean pending = false;
+        for (Purchase purchase : purchases) {
+            if (purchase.getPurchaseState() == Purchase.PurchaseState.PENDING) {
+                pending = true;
+                continue;
+            }
+            if (purchase.getPurchaseState() != Purchase.PurchaseState.PURCHASED) continue;
+            for (String product : purchase.getProducts()) {
+                if (PantryRules.REMOVE_ADS_PRODUCT_ID.equals(product)) ownedAdFree = true;
+                if (PantryRules.PLUS_PRODUCT_ID.equals(product)
+                        && PantryRules.planRank(PantryRules.PLAN_PLUS) > PantryRules.planRank(ownedPlan)) {
+                    ownedPlan = PantryRules.PLAN_PLUS;
+                }
+                if (PantryRules.PRO_PRODUCT_ID.equals(product)) ownedPlan = PantryRules.PLAN_PRO;
+            }
+            if (!purchase.isAcknowledged()) {
+                billingClient.acknowledgePurchase(
+                        AcknowledgePurchaseParams.newBuilder()
+                                .setPurchaseToken(purchase.getPurchaseToken())
+                                .build(),
+                        result -> {
+                            if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+                                setStatus("Purchase received, but Google Play acknowledgement will be retried.");
+                            }
+                        });
+            }
+        }
+        setPlan(ownedPlan, false);
+        setAdsRemoved(ownedAdFree, false);
+        if (notifyUser) {
+            setStatus(pending
+                    ? "A purchase is pending. Features unlock after Google Play confirms payment."
+                    : "Google Play purchases restored.");
+        }
+        buildUi();
+    }
+
+    private void refreshPlansIfVisible() {
+        runOnUiThread(() -> {
+            if (activeTab == 5) buildUi();
+        });
     }
 
     private void setPlan(String plan, boolean recordPurchase) {
@@ -1812,8 +1998,15 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (isProductionBillingConfigured()) queryOwnedPurchases(false);
+    }
+
+    @Override
     protected void onDestroy() {
         destroyCurrentAdView();
+        if (billingClient != null) billingClient.endConnection();
         super.onDestroy();
     }
 

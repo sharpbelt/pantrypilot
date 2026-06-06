@@ -29,8 +29,10 @@ Safe release wording:
 
 - Use "photo-assisted item entry" and "label text parser."
 - Do not claim automatic package-image OCR yet.
-- Do not claim real in-app purchases until Google Play Billing replaces the demo purchase flow.
-- Do not claim live ads until the Google Mobile Ads SDK and real AdMob IDs are integrated.
+- Google Play Billing and AdMob are integrated; do not promote until real
+  Play-distributed purchase tests pass.
+- Upload screenshots 01 through 06 only. Screenshots 07 and 08 show debug-only
+  purchase controls and must be replaced before use.
 
 Remaining manual Play Console fields:
 
@@ -42,6 +44,7 @@ Remaining manual Play Console fields:
 - App access / review note from `..\GOOGLE_PLAY_MONETIZATION_SETUP.md`
 - Launch go/no-go from `..\STORE_LAUNCH_READINESS.md`
 - In-app products: `pantrypilot_remove_ads_one_time`, `pantrypilot_plus_one_time`, `pantrypilot_pro_one_time`
+- Real purchase test results for success, decline, pending, restore, refund, and revoke
 - Pricing country availability
 - Content rating questionnaire
 - Target audience questionnaire

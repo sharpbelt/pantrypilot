@@ -15,13 +15,23 @@ android {
         applicationId "app.pantrypilot.app"
         minSdk 26
         targetSdk 35
-        versionCode 102
-        versionName "1.0.2"
+        versionCode 103
+        versionName "1.0.3"
         buildConfigField "String", "ADMOB_BANNER_ID", "\"ca-app-pub-4099703658403844/8712485724\""
+        buildConfigField "boolean", "PLAY_BILLING_ENABLED", "true"
     }
 
     buildFeatures {
         buildConfig true
+    }
+
+    packaging {
+        resources {
+            excludes += [
+                    "commonMain/**",
+                    "META-INF/kotlin-project-structure-metadata.json"
+            ]
+        }
     }
 
     signingConfigs {
@@ -38,6 +48,7 @@ android {
     buildTypes {
         debug {
             buildConfigField "String", "ADMOB_BANNER_ID", "\"ca-app-pub-3940256099942544/9214589741\""
+            buildConfigField "boolean", "PLAY_BILLING_ENABLED", "false"
         }
         release {
             debuggable false
@@ -52,4 +63,5 @@ android {
 dependencies {
     implementation "com.google.android.gms:play-services-ads:24.9.0"
     implementation "com.google.android.ump:user-messaging-platform:4.0.0"
+    implementation "com.android.billingclient:billing:9.0.0"
 }

@@ -13,15 +13,15 @@ PantryPilot lets users enter and store:
 - grocery-list items and checked status;
 - text pasted into the package-label parser;
 - locally selected or captured package images; and
-- app settings, tutorial state, and local demo entitlement state.
+- app settings, tutorial state, and local entitlement state.
 
 PantryPilot does not upload pantry contents, grocery lists, package images, or
 label text to a PantryPilot server. The app does not use accounts, device
-location permissions, contacts, notifications, or Google Play Billing.
+location permissions, contacts, or notifications.
 
 ## Local Processing And Storage
 
-Pantry and grocery data, settings, and demo entitlement state are stored in
+Pantry and grocery data, settings, and entitlement state are stored in
 PantryPilot's private app storage on the device.
 
 Selected package images and pasted label text are processed locally. Imported
@@ -45,9 +45,19 @@ user chose to share. PantryPilot does not otherwise share this data.
 
 ## Purchases
 
-The current build includes local demo purchase controls for testing plan gates
-and the Remove Ads entitlement. They do not charge money, contact Google Play,
-or collect payment information.
+PantryPilot uses Google Play Billing for optional one-time digital upgrades:
+Remove Ads, Plus, and Pro. Google Play handles checkout and payment information;
+PantryPilot does not receive credit-card or bank-account details.
+
+PantryPilot receives purchase status, product identifiers, and purchase tokens
+from Google Play to grant, acknowledge, and restore owned upgrades. These are
+processed locally by the app and Google Play. PantryPilot does not send them to
+a PantryPilot server.
+
+More information:
+
+- Google Play Privacy Notice: https://policies.google.com/privacy
+- Google Play purchase help: https://support.google.com/googleplay/answer/2850369
 
 ## Advertising And Consent
 
@@ -75,8 +85,8 @@ More information:
 - How Google uses information from sites or apps that use its services:
   https://policies.google.com/technologies/partner-sites
 
-Before a future release enables Google Play Billing, analytics, online services,
-or other third-party SDKs, this policy and the Google Play Data safety
+Before a future release enables analytics, online services, or other third-party
+SDKs, this policy and the Google Play Data safety
 declarations will be updated to describe their data handling.
 
 ## Security

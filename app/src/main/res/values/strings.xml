@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">PantryPilot</string>
     <string name="privacy_title">Privacy</string>
-    <string name="privacy_body">PantryPilot stores pantry items, grocery lists, settings, and demo entitlement state in private app storage. Package images and label text are processed locally. Free users may receive Google AdMob banners after applicable privacy choices. Google may process IP address, app and ad interactions, diagnostics, and device identifiers for advertising, analytics, and fraud prevention. Paid and ad-free users do not receive banner requests. PantryPilot only sends list text to another app when you explicitly use the Android share sheet. Clear PantryPilot app storage or uninstall PantryPilot to delete local data.</string>
-    <string name="about_title">PantryPilot 1.0.2</string>
+    <string name="privacy_body">PantryPilot stores pantry items, grocery lists, settings, and entitlement state in private app storage. Package images and label text are processed locally. Free users may receive Google AdMob banners after applicable privacy choices. Google may process IP address, app and ad interactions, diagnostics, and device identifiers for advertising, analytics, and fraud prevention. Google Play handles optional one-time upgrade checkout; PantryPilot does not receive payment-card or bank details. Paid and ad-free users do not receive banner requests. PantryPilot only sends list text to another app when you explicitly use the Android share sheet. Clear PantryPilot app storage or uninstall PantryPilot to delete local data.</string>
+    <string name="about_title">PantryPilot 1.0.3</string>
     <string name="about_body">Smart pantry, expiry, grocery, and meal planning app. Package: app.pantrypilot.app</string>
 </resources>

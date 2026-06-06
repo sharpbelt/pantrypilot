@@ -1,131 +1,76 @@
 # Google Play Monetization Setup
 
-This app has production AdMob/UMP integration, while Play Billing remains intentionally inert:
-
-- Billing mode is `demo`, so purchase buttons only change local test entitlements.
-- Debug builds use Google's sample adaptive-banner unit.
-- Release builds use the PantryPilot production banner unit.
-- Ads initialize only after UMP says ads may be requested.
+PantryPilot `1.0.3` uses Google Mobile Ads SDK 24.9.0, UMP 4.0.0, and Google
+Play Billing Library 9.0.0. It sells non-consumable one-time upgrades only.
 
 ## Product IDs
 
-Create these one-time products in Play Console. Keep them non-consumable.
+| Product | ID | Suggested price |
+| --- | --- | --- |
+| Remove Ads | `pantrypilot_remove_ads_one_time` | GBP/USD 0.99 |
+| Plus | `pantrypilot_plus_one_time` | GBP/USD 2.99 |
+| Pro | `pantrypilot_pro_one_time` | GBP/USD 4.99 |
 
-| Product | Play product ID | Suggested price | Effect |
-| --- | --- | --- | --- |
-| Remove Ads | `pantrypilot_remove_ads_one_time` | `0.99 USD` or local equivalent | Keeps Free limits but hides the banner ad. |
-| Plus | `pantrypilot_plus_one_time` | low one-time unlock | Removes ads, raises limits, unlocks scanner review, label parsing, sharing, and full meal ideas. |
-| Pro | `pantrypilot_pro_one_time` | higher one-time unlock | Removes ads, raises limits further, and unlocks meal extras. |
+Create, price, activate, and make each product's default buy option
+legacy-compatible in Play Console.
 
-For the low-upkeep business model, use one-time products instead of subscriptions.
+## Release Billing Behavior
 
-Official reference: Google describes one-time products as single-charge digital items, including non-consumable permanent benefits such as ad-free app versions: https://developer.android.com/google/play/billing/one-time-products
+- Queries active products and localized prices from Google Play.
+- Launches Google Play's purchase screen.
+- Grants features only for completed `PURCHASED` purchases.
+- Does not grant pending purchases.
+- Restores owned purchases on connection, resume, and user request.
+- Acknowledges completed non-consumable purchases.
+- Removes revoked/refunded entitlements when Google Play reports the current
+  owned-purchase set.
 
-## Current Monetization Gates
+Release builds enable Billing. Debug builds retain local, non-charging demo
+controls so automated feature tests never make purchases.
 
-- AdMob application ID is stored in `AndroidManifest.xml`.
-- Banner IDs are supplied through `BuildConfig.ADMOB_BANNER_ID`.
-- Debug uses Google's sample adaptive-banner unit.
-- Release uses PantryPilot's production banner unit.
-- UMP must complete its consent/status check before Mobile Ads initializes.
-- Billing remains a local demo and must not be described as a real purchase flow.
+## Security Tradeoff
 
-## Google Play Console Setup
+This client-only integration matches the low-maintenance launch objective and
+uses Google Play's supported client acknowledgement path. It does not perform
+server-side token verification and is therefore less resistant to tampering.
+Add a verification backend only if fraud becomes material.
 
-1. Create the app in Play Console.
-2. App name: `PantryPilot`.
-3. Default language: English.
-4. App type: App.
-5. Pricing: Free, because monetization is through ads and in-app products.
-6. Category: Productivity or Food & Drink. Productivity is the safer fit for the current pantry/list workflow.
-7. Upload `C:\tmp\PantryPilot-release.aab` to an internal testing track first.
-8. Complete Store Listing using `STORE_LISTING.md` and `store_page\PLAY_STORE_PAGE.md`.
-9. Add screenshots and graphics from `store_page`.
-10. Complete Data Safety using `DATA_SAFETY.md`.
-11. Publish `PRIVACY_POLICY.md` to a public HTTPS URL and paste that URL in Play Console.
-12. In App access, state that no login is required. Reviewers can use the app immediately. In test builds, the Plans screen has local demo purchase buttons that do not charge money.
+## Billing Test Gate
 
-Official Play Console app creation guide: https://support.google.com/googleplay/android-developer/answer/9859152
+Before production:
 
-## In-App Product Setup
+1. Add a Google account under Play Console **License testing**.
+2. Add it to the Internal testing track.
+3. Upload version code `103`.
+4. Install from the Play test link.
+5. Test success, decline, pending approval, pending decline, restore,
+   acknowledgement, refund, and revoke behavior.
+6. Confirm prices and product names load from Play.
 
-1. In Play Console, open Monetize > Products > In-app products.
-2. Create each product ID exactly as listed above.
-3. Mark each product active.
-4. Add clear names:
-   - `Remove Ads`
-   - `PantryPilot Plus`
-   - `PantryPilot Pro`
-5. Add short descriptions that match the in-app plan cards.
-6. Use one-time non-consumable purchase behavior.
-7. Add license testers before internal testing.
-8. Upload the AAB to an internal testing track before expecting real product queries to work.
+## AdMob Status
 
-## Billing Integration Drop-In
+- Release uses the production banner unit.
+- Debug uses Google's test adaptive-banner unit.
+- Ad requests wait for UMP privacy status.
+- US-state and European-regulations messages are active.
+- Root publisher file: `https://sharpbelt.github.io/app-ads.txt`
+- Privacy policy:
+  `https://sharpbelt.github.io/pantrypilot/PRIVACY_POLICY.md`
 
-When ready to accept real money:
+Never click live release ads during testing.
 
-1. Add the Google Play Billing Library dependency.
-2. Add the billing permission required by the library setup.
-3. Change:
-   ```java
-   private static final String BILLING_MODE = BILLING_MODE_PRODUCTION;
-   ```
-4. Replace `confirmDemoPurchase()` and `confirmDemoRemoveAds()` with BillingClient purchase flows.
-5. Query product details for:
-   - `pantrypilot_remove_ads_one_time`
-   - `pantrypilot_plus_one_time`
-   - `pantrypilot_pro_one_time`
-6. Only call `setAdsRemoved(true, true)` after a valid Remove Ads purchase is purchased and acknowledged.
-7. Only call `setPlan(plan, true)` after a valid Plus or Pro purchase is purchased and acknowledged.
-8. On app launch, call Play Billing restore/query purchases and re-apply owned entitlements.
-9. Keep demo purchase wording out of the production build.
-
-Official Billing integration guide: https://developer.android.com/google/play/billing/integrate
-
-## AdMob Setup
-
-Completed in the app:
-
-1. PantryPilot is registered in AdMob.
-2. A banner ad unit exists.
-3. Google Mobile Ads SDK and UMP are integrated.
-4. The AdMob application ID is in `AndroidManifest.xml`.
-5. Debug uses Google's sample adaptive-banner unit. Never test by clicking the live release unit.
-6. Free users receive an adaptive banner; Remove Ads, Plus, and Pro users do not.
-7. Privacy and Data Safety documents disclose AdMob data handling.
-
-Required console/hosting steps:
-
-1. In AdMob, open **Privacy & messaging**.
-2. Create and publish a **European regulations** message for PantryPilot.
-3. Target EEA, UK, and Switzerland and provide a clear reject/manage option.
-4. Use `https://sharpbelt.github.io/pantrypilot/PRIVACY_POLICY.md` as the privacy-policy URL.
-5. Publish this repository's `app-ads.txt` at `https://sharpbelt.github.io/app-ads.txt`.
-6. Set the Play Store developer website to `https://sharpbelt.github.io`.
-7. In Play Console, declare that the app contains ads and complete Data Safety from `DATA_SAFETY.md`.
-8. Test with Mullvad/ad-blocking DNS disabled or with PantryPilot and Google's ad domains allowed. Blocking those domains correctly leaves the banner empty.
-
-Official AdMob quick start: https://developers.google.com/admob/android/quick-start
-Official banner guide: https://developers.google.com/admob/android/banner
-
-## Review Notes To Paste Into Play Console
-
-Use this for App access / review notes while the demo purchase build is under test:
+## Play Console Review Note
 
 ```text
-No account or login is required. Open PantryPilot and use the tabs at the top of the app. The Plans screen includes local demo purchase buttons for reviewer testing only; they do not charge money or contact Google Play in this build. Free users see a small sponsor banner placeholder. Remove Ads, Plus, and Pro entitlements hide ads.
+No account or login is required. Open PantryPilot and use the tabs at the top
+of the app. Optional Remove Ads, Plus, and Pro upgrades use Google Play one-time
+products. Free users may see a small consent-gated banner ad. Reviewers can use
+the core pantry, expiry, grocery, scanner sample, and meal-idea features without
+special access.
 ```
 
-For the real billing build, update the note:
+## Official References
 
-```text
-No account or login is required. Paid features are available through Google Play one-time in-app products. License testers can purchase Remove Ads, Plus, or Pro using Play test payment methods from the Plans screen.
-```
-
-## Release Blockers Before Real Monetization
-
-- Do not publish the ad build until the AdMob European regulations message is published, `app-ads.txt` is reachable, and the hosted privacy policy matches the current file.
-- Verify a debug sample ad loads on a device without VPN/ad-blocking DNS.
-- Do not accept real payments until Google Play Billing purchase, acknowledgement, and restore flows are implemented and tested.
-- Keep the first public build conservative: Free plus banner, `0.99` Remove Ads, and one-time Plus/Pro unlocks. Avoid forced interstitials.
+- Billing integration: https://developer.android.com/google/play/billing/integrate
+- Billing testing: https://developer.android.com/google/play/billing/test
+- AdMob quick start: https://developers.google.com/admob/android/quick-start

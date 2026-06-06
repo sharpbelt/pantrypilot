@@ -13,8 +13,8 @@ iOS support is intentionally removed from this candidate.
 - Debug APK: `C:\tmp\PantryPilot-debug.apk`
 - Signed release APK: `C:\tmp\PantryPilot-release.apk`
 - Release app bundle: `C:\tmp\PantryPilot-release.aab`
-- Version: `1.0.2`
-- Version code: `102`
+- Version: `1.0.3`
+- Version code: `103`
 - Target SDK: `35`
 
 ## Verified Gates
@@ -27,9 +27,9 @@ iOS support is intentionally removed from this candidate.
 - Android release AAB builds.
 - Signed release APK verifies with Android SDK `apksigner`.
 - Signed release AAB verifies with JDK `jarsigner`.
-- Manifest declares no app permissions.
 - Internet and network-state permissions are present for Google AdMob.
-- No precise location, notification, storage, account, or Play Billing permission is present.
+- Google Play Billing permission is present in the merged release manifest.
+- No precise location, notification, storage, or account permission is present.
 - Release build is not debuggable.
 - Android backup is disabled.
 - Cleartext traffic is disabled.
@@ -40,8 +40,10 @@ iOS support is intentionally removed from this candidate.
 - Debug builds use Google's sample banner unit; release builds use the PantryPilot production banner unit.
 - Google User Messaging Platform privacy choices gate ad requests where required.
 - Paid plans and the standalone ad-free entitlement hide the Free banner.
-- Billing remains in demo mode until the Google Play Billing integration is added and enabled.
-- Demo purchase flow is clearly marked as non-charging.
+- Release builds enable Google Play Billing 9.0.0.
+- Debug builds retain clearly marked non-charging controls for automated tests.
+- Product query, purchase launch, restore, pending-state handling, and
+  acknowledgement compile in release.
 - Photo review, label text parsing, and sharing are Plus gated.
 - Meal extras are Pro gated.
 - Pantry and grocery limits are enforced.
@@ -86,7 +88,9 @@ Visible smoke UI:
 
 Current monetization/tutorial smoke status:
 
-- `tools\android_s20_smoke.ps1` now clears app data by default, verifies the first-run tutorial, taps through it, verifies the Free banner placeholder, and refuses to target any non-S20 serial.
+- `tools\android_s20_smoke.ps1` clears app data by default, verifies the first-run
+  tutorial, taps through it, verifies the Free advertising surface, and refuses
+  to target any non-S20 serial.
 - Latest run on 2026-06-06 passed on S20 serial `R5CN30X6DDT`.
 - Verified first-run tutorial appears and all Next/Start buttons are tappable.
 - Verified first-launch UI contains PantryPilot, Home, Scan, Pantry, Grocery, Meals, Plans, Free plan, Free plan sponsor space, and Remove ads.
@@ -121,7 +125,7 @@ Covered workflows:
 - The Home screen displayed Google's adaptive `Test Ad` creative and the app reported `Test ad loaded.`
 - The earlier VPN/DNS failure was handled safely: no ad request was made while privacy status could not be checked.
 
-## Plan And Demo Purchase Evidence
+## Debug Plan-Gating Evidence
 
 - Free plan shows `3/12` pantry usage and `2/12` grocery usage on seeded first launch.
 - Plans screen shows Free, Remove Ads, Plus, and Pro cards.
@@ -135,11 +139,26 @@ Covered workflows:
   - `Parse Label Text`
   - `Paste label text`
   - `Parse label text`
-- The Remove Ads/Plus/Pro purchase flow is demo-only and local; real Google Play Billing is still required before accepting payments.
+- These debug-only controls do not appear as purchase controls in release builds.
+
+## Google Play Billing Release Evidence
+
+- Release `BuildConfig.PLAY_BILLING_ENABLED` is `true`; debug is `false`.
+- Google Play Billing Library 9.0.0 is integrated.
+- The merged release manifest contains `com.android.vending.BILLING`.
+- Release code queries all three products and launches Google Play purchase
+  flows using `ProductDetails`.
+- Owned purchases are restored on connection, resume, and user request.
+- Features are granted only for `PURCHASED`; `PENDING` does not unlock.
+- Completed purchases are acknowledged.
+- Real runtime Billing tests remain pending until the products are active in
+  Play Console and version code 103 is installed through Play/license testing.
+- Client-only processing is less fraud-resistant than server verification.
 
 ## Play Upload Status
 
-Local/prod-test build readiness is complete. Current S20 runtime smoke for the new first-run tutorial and Free ad placeholder passed on 2026-06-06.
+Local production-candidate build readiness is complete. Final S20 regression
+testing is pending because the device disconnected after Billing integration.
 
 Play upload signing is configured with the local upload keystore:
 

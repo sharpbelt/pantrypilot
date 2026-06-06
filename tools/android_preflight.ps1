@@ -46,8 +46,8 @@ $gradleText = ReadText $appBuild
 Require ($gradleText -match 'namespace\s+"app\.pantrypilot\.app"') "Namespace is app.pantrypilot.app"
 Require ($gradleText -match 'applicationId\s+"app\.pantrypilot\.app"') "Application ID is app.pantrypilot.app"
 Require ($gradleText -match 'targetSdk\s+35') "Target SDK is 35"
-Require ($gradleText -match 'versionCode\s+102') "Version code is 102"
-Require ($gradleText -match 'versionName\s+"1\.0\.2"') "Version name is 1.0.2"
+Require ($gradleText -match 'versionCode\s+103') "Version code is 103"
+Require ($gradleText -match 'versionName\s+"1\.0\.3"') "Version name is 1.0.3"
 Require ($gradleText -match 'debuggable\s+false') "Release build is not debuggable"
 
 $keystoreProperties = Join-Path $ProjectRoot "keystore.properties"
@@ -74,7 +74,6 @@ $forbiddenPermissionTerms = @(
     "ACCESS_COARSE_LOCATION",
     "ACCESS_BACKGROUND_LOCATION",
     "POST_NOTIFICATIONS",
-    "com.android.vending.BILLING",
     "READ_EXTERNAL_STORAGE",
     "WRITE_EXTERNAL_STORAGE"
 )
@@ -102,7 +101,10 @@ Require ($gradleText -match 'play-services-ads:24\.9\.0' -and $gradleText -match
 Require ($gradleText -match '3940256099942544/9214589741' -and $gradleText -match 'buildConfigField\s+"String",\s+"ADMOB_BANNER_ID"') "Debug builds use Google's test banner unit"
 Require ($mainText -match 'requestAdConsent' -and $mainText -match 'loadAndShowConsentFormIfRequired' -and $mainText -match 'canRequestAds') "Ad requests are gated by UMP consent"
 Require ($mainText -match 'getCurrentOrientationAnchoredAdaptiveBannerAdSize' -and $mainText -match 'new AdRequest\.Builder\(\)') "Adaptive AdMob banner loading is implemented"
-Require ($mainText -match 'BILLING_MODE_DEMO' -and $mainText -match 'BILLING_MODE_PRODUCTION' -and $mainText -match 'isProductionBillingConfigured') "Billing demo/production activation gate exists"
+Require ($gradleText -match 'com\.android\.billingclient:billing:9\.0\.0') "Current Google Play Billing SDK is integrated"
+Require ($gradleText -match 'PLAY_BILLING_ENABLED",\s*"true"' -and $gradleText -match 'PLAY_BILLING_ENABLED",\s*"false"') "Release billing and debug demo modes are separated"
+Require ($mainText -match 'BillingClient\.newBuilder' -and $mainText -match 'queryProductDetailsAsync' -and $mainText -match 'launchBillingFlow') "Google Play product query and purchase flow are implemented"
+Require ($mainText -match 'queryPurchasesAsync' -and $mainText -match 'acknowledgePurchase' -and $mainText -match 'PurchaseState\.PENDING') "Purchase restore, acknowledgement, and pending handling are implemented"
 
 $javac = "C:\Program Files\Java\jdk-21\bin\javac.exe"
 $java = "C:\Program Files\Java\jdk-21\bin\java.exe"
@@ -133,6 +135,10 @@ $releaseAab = Join-Path $ProjectRoot "app\build\outputs\bundle\release\app-relea
 Require (Test-Path -LiteralPath $debugApk) "Debug APK exists"
 Require (Test-Path -LiteralPath $releaseApk) "Release APK exists"
 Require (Test-Path -LiteralPath $releaseAab) "Release AAB exists"
+$mergedReleaseManifest = Join-Path $ProjectRoot "app\build\intermediates\merged_manifest\release\processReleaseMainManifest\AndroidManifest.xml"
+if (Test-Path -LiteralPath $mergedReleaseManifest) {
+    Require ((ReadText $mergedReleaseManifest) -match 'com.android.vending.BILLING') "Release manifest receives Google Play Billing permission from the SDK"
+}
 
 $copiedDebug = "C:\tmp\PantryPilot-debug.apk"
 $copiedReleaseApk = if ($hasKeystoreProperties) { "C:\tmp\PantryPilot-release.apk" } else { "C:\tmp\PantryPilot-release-unsigned.apk" }

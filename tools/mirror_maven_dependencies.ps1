@@ -122,6 +122,9 @@ function MirrorArtifact($group, $artifact, $version, $requestedType = "") {
 New-Item -ItemType Directory -Force -Path $Destination | Out-Null
 MirrorArtifact "com.google.android.gms" "play-services-ads" "24.9.0" "aar"
 MirrorArtifact "com.google.android.ump" "user-messaging-platform" "4.0.0" "aar"
+MirrorArtifact "com.android.billingclient" "billing" "9.0.0" "aar"
+MirrorArtifact "com.android.tools.lint" "lint-gradle" "31.5.2" "jar"
+MirrorArtifact "commons-codec" "commons-codec" "1.10" "jar"
 MirrorArtifact "org.checkerframework" "checker-qual" "3.12.0" "jar"
 MirrorArtifact "com.google.errorprone" "error_prone_annotations" "2.11.0" "jar"
 MirrorArtifact "com.google.j2objc" "j2objc-annotations" "1.3" "jar"

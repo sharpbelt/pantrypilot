@@ -2,74 +2,69 @@
 
 Date: 2026-06-06
 
-This is an engineering compliance audit, not legal advice and not a guarantee of Google approval. Google Play review is the authority.
+This is an engineering review, not legal advice or a guarantee of approval.
 
-## Verdict
-
-Current local build appears suitable for Google Play internal testing and a carefully worded free public test release.
-
-Do not submit it as a public monetized release that claims live ads or real in-app purchases until Google Mobile Ads SDK and Google Play Billing are integrated, disclosed, and retested.
-
-## Official Policy Checks Used
-
-- Developer Distribution Agreement: https://play.google/developer-distribution-agreement.html
-- Play Console Terms of Service: https://play.google/console/terms-of-service/
-- Deceptive Behavior / Misleading Claims: https://support.google.com/googleplay/android-developer/answer/9888077
-- Data Safety: https://support.google.com/googleplay/android-developer/answer/10787469
-- Target SDK guidance: https://developer.android.com/distribute/best-practices/develop/target-sdk
-
-## Current Build Evidence
+## Current Technical Position
 
 - Package: `app.pantrypilot.app`
-- App name: `PantryPilot`
+- Version: `1.0.3` / `103`
 - Target SDK: 35
-- No declared Android permissions.
-- No internet permission.
-- No location permission.
-- No notification permission.
-- No storage permission.
-- No Play Billing permission.
-- No live ad SDK.
-- No analytics SDK.
-- No account/login requirement.
-- Local-only pantry, grocery, expiry, scanner review, and meal idea data.
-- Demo purchase buttons clearly state they do not charge money and do not contact Google Play.
-- Store screenshots were regenerated after removing unsupported `AI` wording.
+- Google Mobile Ads SDK with UMP consent handling
+- Google Play Billing 9.0.0 for optional one-time digital upgrades
+- No accounts, analytics SDK, location, contacts, notifications, or broad
+  storage access
+- Local pantry, grocery, image-review, parser, and meal-idea data
+- No unsupported automatic OCR or AI claim
 
-## Risks Fixed In This Pass
+## Monetization Compliance
 
-- Removed current-build `AI` marketing wording from the visible in-app tagline.
-- Removed current-build `AI` wording from public listing draft docs.
-- Updated privacy wording from `ads` to `live ad networks` so it matches the placeholder sponsor surface.
-- Regenerated all eight phone screenshots from the updated app so screenshots no longer show the old `AI` tagline.
+Remove Ads, Plus, and Pro are digital app features and use Google Play Billing.
+Release builds do not expose the debug-only local purchase controls. Purchases
+are granted only in `PURCHASED` state, pending purchases do not unlock features,
+and completed purchases are acknowledged.
 
-## Remaining Launch Boundaries
+The client-only implementation has no backend verification. Google supports
+client-only acknowledgement, but recommends secure backend verification. This
+is a fraud-resistance tradeoff, not a Play Billing policy bypass.
 
-Compliant-looking for internal testing:
+## Advertising Compliance
 
-- Free app setup.
-- Demo purchase flow disclosed to reviewers in App access notes.
-- No live ads/IAP claims in public metadata.
+- Free users receive a small adaptive banner.
+- Remove Ads, Plus, and Pro users do not receive banner requests.
+- UMP checks applicable privacy choices before Mobile Ads initializes.
+- US-state and European-regulations messages are active.
+- `https://sharpbelt.github.io/app-ads.txt` contains the publisher record.
+- The privacy policy and Data Safety draft disclose AdMob handling.
 
-Not ready for public monetized launch:
+## Required Play Console Declarations
 
-- Real Google Play Billing is not integrated.
-- Real purchase restore is not integrated.
-- Real AdMob banner rendering is not integrated.
-- Data Safety and privacy policy need updates before real ads/billing are enabled.
+- Contains ads: **Yes**
+- Data collection/sharing: **Yes**, complete from `DATA_SAFETY.md`
+- App access: no login or restricted access
+- Financial features: the app does not provide financial services
+- Health features: none
+- Target audience: adults; do not target children
+- In-app products: declare and activate all three one-time products
 
-## Manual Play Console Declarations
+## Remaining Review Risks
 
-Only the account owner should tick these:
+- Real purchase flows must be tested through Play before production.
+- Store screenshots must not show debug/demo purchase controls.
+- Hosted privacy policy must remain synchronized with app scope.
+- Store copy must not claim automatic image OCR, cloud sync, accounts, location
+  reminders, subscriptions, or other unavailable features.
+- Complete the required closed test before applying for production access when
+  applicable to the developer account.
 
-- Developer Programme Policies.
-- Play app signing Terms of Service.
-- US export laws.
+## Official References
 
-Current technical basis for export declaration: the app has no custom encryption, no internet permission, and no network service integration in this build. This does not replace the developer's own legal/export responsibility.
-
-## Practical Compliance Conclusion
-
-Based on current source, manifest, docs, screenshots, and device smoke tests, I do not see an obvious Google Play policy violation for an internal-test/free candidate.
-
-The main compliance condition is truthful presentation: do not claim automatic OCR, AI, live ads, paid purchases, subscriptions, cloud sync, account services, location reminders, or notifications until those features are actually implemented, disclosed, and tested.
+- Play Billing integration:
+  https://developer.android.com/google/play/billing/integrate
+- Play Billing testing:
+  https://developer.android.com/google/play/billing/test
+- Data Safety:
+  https://support.google.com/googleplay/android-developer/answer/10787469
+- Payments policy:
+  https://support.google.com/googleplay/android-developer/answer/9858738
+- Personal-account testing requirement:
+  https://support.google.com/googleplay/android-developer/answer/14151465

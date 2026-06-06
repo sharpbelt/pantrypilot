@@ -1,6 +1,6 @@
 # Google Play Data Safety Draft - AdMob Build
 
-Applies to PantryPilot `1.0.2` / version code `102`.
+Applies to PantryPilot `1.0.3` / version code `103`.
 
 The final Play Console answers remain the developer's responsibility. Recheck
 Google Mobile Ads SDK disclosures whenever its dependency version changes.
@@ -70,15 +70,27 @@ Mobile Ads SDK 24.9.0 automatically collects and shares advertising data.
 - Package images
 - Pasted label text
 - Local meal ideas
-- Local demo purchase and ad-free entitlement state
+- Local purchase and ad-free entitlement state
+- Google Play purchase entitlement state is processed locally and through Google
+  Play Billing; PantryPilot does not receive users' payment-card or bank details.
 
 ## Permissions And SDKs
 
 - Internet and network-state access are used for AdMob.
 - Google Mobile Ads SDK: `24.9.0`
 - Google User Messaging Platform SDK: `4.0.0`
-- No account, precise location, contacts, storage, notification, or Play Billing
-  permission is currently used.
+- Google Play Billing Library: `9.0.0`
+- Google Play Billing permission is used for optional one-time digital upgrades.
+- No account, precise location, contacts, storage, or notification permission is
+  currently used.
+
+## Google Play Billing Data Safety Note
+
+Google Play collects payment information directly under Google's terms.
+PantryPilot never accesses payment-card or bank-account details, so those payment
+details do not need to be declared as collected by PantryPilot. Recheck the Play
+Console form if future code sends purchase history or purchase tokens to a
+PantryPilot backend.
 
 Official SDK disclosure:
 https://developers.google.com/admob/android/privacy/play-data-disclosure
