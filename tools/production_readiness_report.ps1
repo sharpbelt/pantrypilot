@@ -48,9 +48,13 @@ if (Test-Path -LiteralPath $storePackage) {
     try {
         $names = @($archive.Entries | ForEach-Object { $_.FullName })
         $screenshots = @($names | Where-Object { $_ -match '^phone_screenshots\\0[1-6]_.+\.png$' })
+        $tablet7Screenshots = @($names | Where-Object { $_ -match '^tablet_7_screenshots\\0[1-4]_.+\.png$' })
+        $tablet10Screenshots = @($names | Where-Object { $_ -match '^tablet_10_screenshots\\0[1-4]_.+\.png$' })
         $hasKit = $names -contains "CLOSED_TESTING_GUIDE.md" -and $names -contains "CLOSED_TESTER_TRACKER.csv"
         $hasDebugCaptures = @($names | Where-Object { $_ -match 'raw|07_|08_' }).Count -gt 0
         Add-Check "Store package has six production screenshots" ($screenshots.Count -eq 6) "$($screenshots.Count) expected screenshots found."
+        Add-Check "Store package has four 7-inch tablet screenshots" ($tablet7Screenshots.Count -eq 4) "$($tablet7Screenshots.Count) expected screenshots found."
+        Add-Check "Store package has four 10-inch tablet screenshots" ($tablet10Screenshots.Count -eq 4) "$($tablet10Screenshots.Count) expected screenshots found."
         Add-Check "Store package includes closed-test kit" $hasKit "Guide and tester tracker are packaged."
         Add-Check "Store package excludes debug captures" (!$hasDebugCaptures) "No raw, 07, or 08 screenshots found."
     } finally {
@@ -109,4 +113,3 @@ Write-Output "Report written to $Output"
 
 if ($failed.Count -gt 0) { exit 1 }
 exit 0
-

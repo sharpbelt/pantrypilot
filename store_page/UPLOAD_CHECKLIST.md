@@ -7,6 +7,10 @@ Use these files:
 - Feature graphic: `graphics/feature_graphic_1024x500.png`
 - Phone screenshots: `phone_screenshots/01_home.png` through
   `phone_screenshots/06_meals.png`
+- 7-inch tablet screenshots: `tablet_7_screenshots/01_home.png` through
+  `tablet_7_screenshots/04_meals.png`
+- 10-inch tablet screenshots: `tablet_10_screenshots/01_home.png` through
+  `tablet_10_screenshots/04_meals.png`
 - Store copy: `PLAY_STORE_PAGE.md`
 - Screenshot captions and alt text: `SCREENSHOT_MANIFEST.csv`
 - Monetization setup: `..\GOOGLE_PLAY_MONETIZATION_SETUP.md`
@@ -19,6 +23,8 @@ Verified local asset dimensions:
 - App icon: 512 x 512, RGBA PNG
 - Feature graphic: 1024 x 500, RGB PNG
 - Phone screenshots: 1080 x 2160, RGB PNG
+- 7-inch tablet screenshots: 720 x 1280 portrait PNG
+- 10-inch tablet screenshots: 1080 x 1920 portrait PNG
 
 Google Play requirements checked on 2026-06-06:
 
@@ -37,6 +43,8 @@ Safe release wording:
 - Upload screenshots 01 through 06 only. A Plans screenshot is intentionally
   omitted until it can be captured from Play internal testing with active
   products and real localized prices.
+- Upload all four verified screenshots from each tablet folder into the
+  corresponding 7-inch and 10-inch Play Console fields.
 - Run `tools\capture_store_screenshots.ps1` before packaging. It captures the
   legitimate Remove Ads experience and writes `SCREENSHOT_VERIFICATION.json`.
 - Run `tools\create_store_page_package.ps1` to create the upload package. It

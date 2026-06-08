@@ -1,0 +1,24 @@
+{
+    "captured_at_utc":  "2026-06-08T16:44:19.0906196Z",
+    "tablet_size":  "10-inch",
+    "serial":  "emulator-5558",
+    "apk_sha256":  "47268EB5C963186B921F10EFD129CDAABC47C28934183791DF45D0C23055617C",
+    "screenshots":  [
+                        {
+                            "file":  "tablet_10_screenshots/01_home.png",
+                            "sha256":  "07F3F469E3967F27D22B63BBE087FDD149F63950527B938A43E275398081F55F"
+                        },
+                        {
+                            "file":  "tablet_10_screenshots/02_scan_parser.png",
+                            "sha256":  "B959FCA71B3B378568B28F1CB4E2D99466326310EE554010A7468D6A5634A1E1"
+                        },
+                        {
+                            "file":  "tablet_10_screenshots/03_pantry.png",
+                            "sha256":  "CBB2537C79EE98E52575335CFEC36ADD4790F9B8F11D7B26C458A888E3C7DB55"
+                        },
+                        {
+                            "file":  "tablet_10_screenshots/04_meals.png",
+                            "sha256":  "C2945AE726A3BE2348DA4877AECB29AD34000216A2E620C0839B3279661D7604"
+                        }
+                    ]
+}

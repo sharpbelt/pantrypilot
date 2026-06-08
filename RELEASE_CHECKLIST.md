@@ -26,6 +26,7 @@
 - Complete listing, Data Safety, Ads, App access, Content rating, Target
   audience, Financial features, and Health declarations.
 - Upload screenshots 01 through 06; do not upload debug Plans screenshots.
+- Upload the four verified 7-inch and four verified 10-inch tablet screenshots.
 - Run the required closed test and apply for production access if applicable.
 
 ## Production Gates

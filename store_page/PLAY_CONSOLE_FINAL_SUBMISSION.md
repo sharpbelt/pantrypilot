@@ -65,6 +65,10 @@ photo-assisted item entry, label parsing, and local meal ideas.
 - Icon: `graphics/app_icon_512.png`
 - Feature graphic: `graphics/feature_graphic_1024x500.png`
 - Upload screenshots 01 through 06 only.
+- Upload all four screenshots from `tablet_7_screenshots` to the 7-inch tablet
+  field.
+- Upload all four screenshots from `tablet_10_screenshots` to the 10-inch
+  tablet field.
 
 ## 5. App Content Declarations
 

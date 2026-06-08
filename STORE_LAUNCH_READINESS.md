@@ -75,6 +75,8 @@ Upload:
 - `store_page\graphics\app_icon_512.png`
 - `store_page\graphics\feature_graphic_1024x500.png`
 - Screenshots `01_home.png` through `06_meals.png`
+- Four verified 7-inch tablet screenshots
+- Four verified 10-inch tablet screenshots
 
 The upload package intentionally omits a Plans screenshot. Capture one from a
 Play internal-test install only after the real products are active and prices
